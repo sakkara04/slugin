@@ -1,11 +1,15 @@
 "use client"
 import React, { useState } from 'react'
 import Majors from './majors'
+import Industries from './industries'
+// import { supabase } from '../lib/supabaseClient' // Adjust this path once we finish connecting Supabase
 
 const majorsList = Majors; 
+const industryList = Industries
 
 const Page = () => {
   const [firstName, setFirstName] = useState('')
+  const [preferredName, setPreferredName] = useState('')
   const [lastName, setLastName] = useState('')
   const [pronouns, setPronouns] = useState('')
   const [email, setEmail] = useState('')
@@ -13,13 +17,14 @@ const Page = () => {
   const [major, setMajor] = useState('')
   const [minor, setMinor] = useState('')
   const [year, setYear] = useState('')
+  const [industry, setIndustry] = useState('')
 
   return (
     <div>
       <h1>Profile Page</h1>
       <section>
         <div style={{ marginBottom: 12 }}>
-          <label htmlFor="firstName">Name</label>
+          <label htmlFor="firstName">Name (required)</label>
           <br />
           <input
             id="firstName"
@@ -31,7 +36,19 @@ const Page = () => {
         </div>
 
         <div style={{ marginBottom: 12 }}>
-          <label htmlFor="lastName">Last name</label>
+          <label htmlFor="preferredName">Preferred name</label>
+          <br />
+          <input
+            id="preferredName"
+            value={preferredName}
+            onChange={(e) => setPreferredName(e.target.value)}
+            placeholder="Preferred name"
+            className="input"
+          />
+        </div>
+
+        <div style={{ marginBottom: 12 }}>
+          <label htmlFor="lastName">Last name (required)</label>
           <br />
           <input
             id="lastName"
@@ -138,9 +155,25 @@ const Page = () => {
           </select>
         </div>
 
+        <div style={{ marginBottom: 12 }}>
+          <label htmlFor="major">Preferred industry</label>
+          <br />
+          <select
+            id="industry"
+            value={industry}
+            onChange={(e) => setIndustry(e.target.value)}
+            className="input"
+          >
+            <option value="">-- Select industry --</option>
+            {industryList.map((m) => (
+              <option key={m} value={m}>{m}</option>
+            ))}
+          </select>
+        </div>
+
         <div style={{ marginTop: 16 }}>
           <button
-            onClick={() => {
+            onClick={async() => {
               const missing: string[] = []
               if (!firstName.trim()) missing.push('First name')
               if (!lastName.trim()) missing.push('Last name')
@@ -156,6 +189,7 @@ const Page = () => {
 
               const saved = {
                 firstName,
+                preferredName,
                 lastName,
                 pronouns,
                 email,
@@ -163,8 +197,18 @@ const Page = () => {
                 major,
                 minor,
                 year,
+                industry,
               }
-              alert('Saved (dummy): ' + JSON.stringify(saved, null, 2))
+              // Save profile to supabase (will uncomment later)
+              // const { data, error } = await supabase
+              //   .from('profiles')
+              //   .upsert(saved)
+
+              // if (error) {
+              //   alert('Error saving profile: ' + error.message)
+              // } else {
+              //   alert('Profile saved successfully!')
+              // }
             }}
             className="button"
           >
