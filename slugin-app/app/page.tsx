@@ -25,6 +25,9 @@ export default async function StartPage() {
           <Button>
           <a href='/signup'>Sign Up</a>
           </Button>
+          <Button>
+          <a href='/signupfaculty'>Sign Up Faculty</a>
+          </Button>
          <Button variant="outline">
           <a href='/signin'>Sign In</a>
           </Button>
