@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import Majors from './majors'
 import Industries from './industries'
-// import { supabase } from '../lib/supabaseClient' // Adjust this path once we finish connecting Supabase
+import { supabase } from '../lib/supabaseClient'
 
 const majorsList = Majors; 
 const industryList = Industries
@@ -199,16 +199,15 @@ const Page = () => {
                 year,
                 industry,
               }
-              // Save profile to supabase (will uncomment later)
-              // const { data, error } = await supabase
-              //   .from('profiles')
-              //   .upsert(saved)
+              const { data, error } = await supabase
+                .from('profiles')
+                .upsert(saved)
 
-              // if (error) {
-              //   alert('Error saving profile: ' + error.message)
-              // } else {
-              //   alert('Profile saved successfully!')
-              // }
+              if (error) {
+                alert('Error saving profile: ' + error.message)
+              } else {
+                alert('Profile saved successfully!')
+              }
             }}
             className="button"
           >
