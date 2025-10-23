@@ -32,18 +32,25 @@ export async function signup(formData: FormData) {
     email: formData.get('email') as string,
     password: formData.get('password') as string,
     options: {
-    data: {
-      first_name: formData.get('first_name') as string,
-      last_name: formData.get('last_name') as string
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/confirm`,
+      data: {
+        first_name: formData.get('first_name') as string,
+        last_name: formData.get('last_name') as string
+      }
     }
-     }
   }
 
-  const { error } = await supabase.auth.signUp(data)
+  const { data: result, error } = await supabase.auth.signUp(data)
 
   if (error) {
     console.error('Signup error:', error)
     redirect('/error')
+  }
+
+  // Check if email confirmation is required
+  if (result.user && !result.user.email_confirmed_at) {
+    revalidatePath('/', 'layout')
+    redirect('/verify-email?email=' + encodeURIComponent(data.email))
   }
 
   revalidatePath('/', 'layout')
