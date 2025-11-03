@@ -7,7 +7,7 @@ import { useUser } from '@supabase/auth-helpers-react'
 type Opportunity = {
   id: string
   title: string
-  description: String
+  description: string
   professor: string
   application_link?: string
 }
@@ -18,13 +18,13 @@ type Props = {
 
 export default function OpportunityCard({ opportunity }: Props) {
   const user = useUser()
-  const [applied, setApplied] = useState(false)
   const supabase = createClient()
+  const [applied, setApplied] = useState(false)
 
   useEffect(() => {
-    const checkApplicationStatus = async () => {
+    const checkStatus = async () => {
       if (!user) return
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('applications')
         .select('id')
         .eq('user_id', user.id)
@@ -34,7 +34,7 @@ export default function OpportunityCard({ opportunity }: Props) {
       if (data) setApplied(true)
     }
 
-    checkApplicationStatus()
+    checkStatus()
   }, [user, opportunity.id])
 
   const handleApply = async () => {
@@ -53,17 +53,30 @@ export default function OpportunityCard({ opportunity }: Props) {
   }
 
   return (
-    <div className="card">
-      <h3>{opportunity.title}</h3>
-      <p>{opportunity.description}</p>
-      <p><strong>Professor:</strong> {opportunity.professor}</p>
+    <div className="border border-border rounded-lg p-6 bg-card text-card-foreground shadow-sm space-y-4">
+      <h3 className="text-xl font-semibold">{opportunity.title}</h3>
+      <p className="text-muted-foreground">{opportunity.description}</p>
+      <p className="text-sm">
+        <strong>Professor:</strong> {opportunity.professor}
+      </p>
+
       {opportunity.application_link && (
-        <a href={opportunity.application_link} target="_blank" rel="noopener noreferrer">
+        <a
+          href={opportunity.application_link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue underline hover:text-dark-blue transition"
+        >
           Apply Here
         </a>
       )}
+
       {user && (
-        <button onClick={handleApply} disabled={applied}>
+        <button
+          onClick={handleApply}
+          disabled={applied}
+          className={`button ${applied ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
           {applied ? 'Applied' : 'Mark Applied'}
         </button>
       )}
