@@ -15,14 +15,14 @@ const mockOpportunities = [
     title: 'Join the AI Research Lab',
     description: 'Work on cutting-edge machine learning projects with UCSC faculty.',
     professor: 'Dr. Nguyen',
-    application_link: '',
+    application_link: 'Apply here',
   },
   {
     id: 'def456',
     title: 'Environmental Action Club',
     description: 'Help organize campus events and advocate for sustainability.',
     professor: 'Prof. Martinez',
-    application_link: '',
+    application_link: 'Apply here',
   },
 ]
 
