@@ -1,8 +1,16 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '../../utils/supabase/client'
+import { createClient } from '@/utils/supabase/client'
 import { useUser } from '@supabase/auth-helpers-react'
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card'
 
 type Opportunity = {
   id: string
@@ -53,33 +61,31 @@ export default function OpportunityCard({ opportunity }: Props) {
   }
 
   return (
-    <div className="border border-border rounded-lg p-6 bg-card text-card-foreground shadow-sm space-y-4">
-      <h3 className="text-xl font-semibold">{opportunity.title}</h3>
-      <p className="text-muted-foreground">{opportunity.description}</p>
-      <p className="text-sm">
-        <strong>Professor:</strong> {opportunity.professor}
-      </p>
-
-      {opportunity.application_link && (
-        <a
-          href={opportunity.application_link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue underline hover:text-dark-blue transition"
-        >
-          Apply Here
-        </a>
-      )}
-
-      {user && (
-        <button
-          onClick={handleApply}
-          disabled={applied}
-          className={`button ${applied ? 'opacity-50 cursor-not-allowed' : ''}`}
-        >
-          {applied ? 'Applied' : 'Mark Applied'}
-        </button>
-      )}
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>{opportunity.title}</CardTitle>
+        <CardDescription>{opportunity.description}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <p className="text-sm">
+          <strong>Professor:</strong> {opportunity.professor}
+        </p>
+        {opportunity.application_link && (
+          <a
+            href={opportunity.application_link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue underline hover:text-dark-blue transition"
+          >
+            Apply Here
+          </a>
+        )}
+        {user && (
+          <Button onClick={handleApply} disabled={applied}>
+            {applied ? 'Applied' : 'Mark Applied'}
+          </Button>
+        )}
+      </CardContent>
+    </Card>
   )
 }

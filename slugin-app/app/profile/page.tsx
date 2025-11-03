@@ -1,16 +1,30 @@
 'use client'
 
-import React, { useState } from 'react'
+import { useState } from 'react'
 import Majors from './majors'
 import Industries from './industries'
-import { createClient } from '../../utils/supabase/client'
+import { createClient } from '@/utils/supabase/client'
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card'
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldDescription,
+} from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
 
 const supabase = createClient()
-
 const majorsList = Majors
 const industryList = Industries
 
-const Page = () => {
+export default function ProfilePage() {
   const [firstName, setFirstName] = useState('')
   const [preferredName, setPreferredName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -22,192 +36,193 @@ const Page = () => {
   const [year, setYear] = useState('')
   const [industry, setIndustry] = useState('')
 
+  const handleSave = async () => {
+    const missing: string[] = []
+    if (!firstName.trim()) missing.push('First name')
+    if (!lastName.trim()) missing.push('Last name')
+    if (!pronouns.trim()) missing.push('Pronouns')
+    if (!email.trim()) missing.push('Email')
+    if (!major) missing.push('Major')
+    if (!year) missing.push('Year')
+
+    if (missing.length > 0) {
+      alert('Please fill the required fields: ' + missing.join(', '))
+      return
+    }
+
+    const saved = {
+      firstName,
+      preferredName,
+      lastName,
+      pronouns,
+      email,
+      bio,
+      major,
+      minor,
+      year,
+      industry,
+    }
+
+    const { error } = await supabase.from('profiles').upsert(saved)
+
+    if (error) {
+      alert('Error saving profile: ' + error.message)
+    } else {
+      alert('Profile saved successfully!')
+    }
+  }
+
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-semibold mb-6">Profile Page</h1>
-      <section className="space-y-6">
-        <div>
-          <label htmlFor="firstName" className="block font-medium mb-1">Name (required)</label>
-          <input
-            id="firstName"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            placeholder="First name"
-            className="input w-full"
-          />
-        </div>
+    <div className="container mx-auto py-8 px-4 max-w-2xl">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">Edit Your Profile</CardTitle>
+          <CardDescription>
+            Fill out your academic and career preferences
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="firstName">First Name *</FieldLabel>
+              <Input
+                id="firstName"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="First name"
+                required
+              />
+            </Field>
 
-        <div>
-          <label htmlFor="preferredName" className="block font-medium mb-1">Preferred name</label>
-          <input
-            id="preferredName"
-            value={preferredName}
-            onChange={(e) => setPreferredName(e.target.value)}
-            placeholder="Preferred name"
-            className="input w-full"
-          />
-        </div>
+            <Field>
+              <FieldLabel htmlFor="preferredName">Preferred Name</FieldLabel>
+              <Input
+                id="preferredName"
+                value={preferredName}
+                onChange={(e) => setPreferredName(e.target.value)}
+                placeholder="Preferred name"
+              />
+            </Field>
 
-        <div>
-          <label htmlFor="lastName" className="block font-medium mb-1">Last name (required)</label>
-          <input
-            id="lastName"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            placeholder="Last name"
-            className="input w-full"
-          />
-        </div>
+            <Field>
+              <FieldLabel htmlFor="lastName">Last Name *</FieldLabel>
+              <Input
+                id="lastName"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Last name"
+                required
+              />
+            </Field>
 
-        <div className="text-sm text-muted-foreground">
-          <strong>Current values:</strong> {firstName} {lastName}
-        </div>
+            <Field>
+              <FieldLabel htmlFor="pronouns">Pronouns *</FieldLabel>
+              <Input
+                id="pronouns"
+                value={pronouns}
+                onChange={(e) => setPronouns(e.target.value)}
+                placeholder="e.g. she/her, they/them"
+                required
+              />
+            </Field>
 
-        <hr className="border-border" />
+            <Field>
+              <FieldLabel htmlFor="email">Email (UCSC) *</FieldLabel>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="name@ucsc.edu"
+                required
+              />
+            </Field>
 
-        <div>
-          <label htmlFor="pronouns" className="block font-medium mb-1">Pronouns (required)</label>
-          <input
-            id="pronouns"
-            value={pronouns}
-            onChange={(e) => setPronouns(e.target.value)}
-            placeholder="e.g. she/her, they/them"
-            className="input w-full"
-          />
-        </div>
+            <Field>
+              <FieldLabel htmlFor="bio">Biography</FieldLabel>
+              <textarea
+                id="bio"
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                rows={4}
+                className="input w-full"
+                placeholder="Tell us a little about yourself"
+              />
+            </Field>
 
-        <div>
-          <label htmlFor="email" className="block font-medium mb-1">Email (UCSC) (required)</label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="name@ucsc.edu"
-            className="input w-full"
-          />
-        </div>
+            <Field>
+              <FieldLabel htmlFor="major">Major *</FieldLabel>
+              <select
+                id="major"
+                value={major}
+                onChange={(e) => setMajor(e.target.value)}
+                className="input w-full"
+                required
+              >
+                <option value="">-- Select major --</option>
+                {majorsList.map((m) => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+              </select>
+            </Field>
 
-        <div>
-          <label htmlFor="bio" className="block font-medium mb-1">Biography (optional)</label>
-          <textarea
-            id="bio"
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-            placeholder="Tell us a little about yourself"
-            rows={4}
-            className="input w-full"
-          />
-        </div>
+            <Field>
+              <FieldLabel htmlFor="minor">Minor</FieldLabel>
+              <select
+                id="minor"
+                value={minor}
+                onChange={(e) => setMinor(e.target.value)}
+                className="input w-full"
+              >
+                <option value="">-- Select minor --</option>
+                <option value="none">None</option>
+                {majorsList.map((m) => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+              </select>
+            </Field>
 
-        <div>
-          <label htmlFor="major" className="block font-medium mb-1">Major (required)</label>
-          <select
-            id="major"
-            value={major}
-            onChange={(e) => setMajor(e.target.value)}
-            className="input w-full"
-          >
-            <option value="">-- Select major --</option>
-            {majorsList.map((m) => (
-              <option key={m} value={m}>{m}</option>
-            ))}
-          </select>
-        </div>
+            <Field>
+              <FieldLabel htmlFor="year">Year in College *</FieldLabel>
+              <select
+                id="year"
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+                className="input w-full"
+                required
+              >
+                <option value="">-- Select year --</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5+">5+</option>
+              </select>
+            </Field>
 
-        <div>
-          <label htmlFor="minor" className="block font-medium mb-1">Minor</label>
-          <select
-            id="minor"
-            value={minor}
-            onChange={(e) => setMinor(e.target.value)}
-            className="input w-full"
-          >
-            <option value="">-- Select minor --</option>
-            <option value="none">None</option>
-            {majorsList.map((m) => (
-              <option key={m} value={m}>{m}</option>
-            ))}
-          </select>
-        </div>
+            <Field>
+              <FieldLabel htmlFor="industry">Preferred Industry</FieldLabel>
+              <select
+                id="industry"
+                value={industry}
+                onChange={(e) => setIndustry(e.target.value)}
+                className="input w-full"
+              >
+                <option value="">-- Select industry --</option>
+                {industryList.map((m) => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+              </select>
+            </Field>
 
-        <div>
-          <label htmlFor="year" className="block font-medium mb-1">Year in college (required)</label>
-          <select
-            id="year"
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
-            className="input w-full"
-          >
-            <option value="">-- Select year --</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5+">5+</option>
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="industry" className="block font-medium mb-1">Preferred industry</label>
-          <select
-            id="industry"
-            value={industry}
-            onChange={(e) => setIndustry(e.target.value)}
-            className="input w-full"
-          >
-            <option value="">-- Select industry --</option>
-            {industryList.map((m) => (
-              <option key={m} value={m}>{m}</option>
-            ))}
-          </select>
-        </div>
-
-        <div className="pt-4">
-          <button
-            onClick={async () => {
-              const missing: string[] = []
-              if (!firstName.trim()) missing.push('First name')
-              if (!lastName.trim()) missing.push('Last name')
-              if (!pronouns.trim()) missing.push('Pronouns')
-              if (!email.trim()) missing.push('Email')
-              if (!major) missing.push('Major')
-              if (!year) missing.push('Year')
-
-              if (missing.length > 0) {
-                alert('Please fill the required fields: ' + missing.join(', '))
-                return
-              }
-
-              const saved = {
-                firstName,
-                preferredName,
-                lastName,
-                pronouns,
-                email,
-                bio,
-                major,
-                minor,
-                year,
-                industry,
-              }
-
-              const { error } = await supabase.from('profiles').upsert(saved)
-
-              if (error) {
-                alert('Error saving profile: ' + error.message)
-              } else {
-                alert('Profile saved successfully!')
-              }
-            }}
-            className="button"
-          >
-            Save
-          </button>
-        </div>
-      </section>
+            <Field>
+              <Button type="button" onClick={handleSave}>
+                Save Profile
+              </Button>
+            </Field>
+          </FieldGroup>
+        </CardContent>
+      </Card>
     </div>
   )
 }
-
-export default Page

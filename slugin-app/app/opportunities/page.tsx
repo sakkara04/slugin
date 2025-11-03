@@ -1,6 +1,13 @@
 'use client'
 
 import OpportunityCard from './opportunityCard'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card'
 
 const mockOpportunities = [
   {
@@ -21,13 +28,20 @@ const mockOpportunities = [
 
 export default function OpportunitiesPage() {
   return (
-    <main className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Available Opportunities</h1>
-      <div className="space-y-6">
-        {mockOpportunities.map((opportunity) => (
-          <OpportunityCard key={opportunity.id} opportunity={opportunity} />
-        ))}
-      </div>
-    </main>
+    <div className="container mx-auto py-8 px-4 max-w-2xl">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">Available Opportunities</CardTitle>
+          <CardDescription>
+            Browse and mark opportunities you’ve applied to
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {mockOpportunities.map((opportunity) => (
+            <OpportunityCard key={opportunity.id} opportunity={opportunity} />
+          ))}
+        </CardContent>
+      </Card>
+    </div>
   )
 }
