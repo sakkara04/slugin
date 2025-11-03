@@ -15,7 +15,7 @@ export async function postOpportunity(formData: FormData) {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    // redirect('/signin')
+    // redirect('/signin') // commented out for dev purposes
   }
 
   // Get form data
