@@ -2,7 +2,9 @@
 import React, { useState } from 'react'
 import Majors from './majors'
 import Industries from './industries'
-import { supabase } from '../lib/supabaseClient'
+import { createClient } from '../../utils/supabase/client'
+
+const supabase = createClient()
 
 const majorsList = Majors; 
 const industryList = Industries
