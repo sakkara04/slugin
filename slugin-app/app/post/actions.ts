@@ -22,6 +22,7 @@ export async function postOpportunity(formData: FormData) {
   const title = formData.get('title') as string
   const description = formData.get('description') as string
   const deadline = formData.get('deadline') as string
+  const link = formData.get('link') as string
   const location = formData.get('location') as string
   const categories = formData.get('categories') as string
   const file = formData.get('file') as File | null
@@ -37,6 +38,7 @@ export async function postOpportunity(formData: FormData) {
     title,
     description,
     deadline,
+    link,
     location,
     categories,
     file: file?.name,

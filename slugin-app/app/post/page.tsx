@@ -49,7 +49,7 @@ export default async function PostPage() {
           <form action={postOpportunity}>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="title">Title *</FieldLabel>
+                <FieldLabel htmlFor="title">Title</FieldLabel>
                 <Input
                   id="title"
                   name="title"
@@ -60,7 +60,7 @@ export default async function PostPage() {
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="description">Description *</FieldLabel>
+                <FieldLabel htmlFor="description">Description</FieldLabel>
                 <textarea
                   id="description"
                   name="description"
@@ -75,7 +75,7 @@ export default async function PostPage() {
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="deadline">Deadline/Expiry Date *</FieldLabel>
+                <FieldLabel htmlFor="deadline">Deadline/Expiry Date</FieldLabel>
                 <Input
                   id="deadline"
                   name="deadline"
@@ -88,7 +88,18 @@ export default async function PostPage() {
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="location">Location *</FieldLabel>
+                <FieldLabel htmlFor="link">Application Link</FieldLabel>
+                <Input
+                  id="link"
+                  name="link"
+                  type="text"
+                  placeholder="insert application link here"
+                  required
+                />
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="location">Location</FieldLabel>
                 <Input
                   id="location"
                   name="location"
@@ -97,9 +108,11 @@ export default async function PostPage() {
                   required
                 />
               </Field>
+              
+           
 
               <Field>
-                <FieldLabel htmlFor="categories">Categories/Tags *</FieldLabel>
+                <FieldLabel htmlFor="categories">Categories/Tags</FieldLabel>
                 <Input
                   id="categories"
                   name="categories"
