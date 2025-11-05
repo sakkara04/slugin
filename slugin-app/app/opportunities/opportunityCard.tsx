@@ -13,14 +13,14 @@ import {
 } from '@/components/ui/card'
 
 type Opportunity = {
-  id: string
-  title: string
-  description: string
-  deadline: string
-  location: string
-  categories: string
-  listedBy: string
-  application_link?: string
+  id: any
+  title?: string
+  description?: string
+  deadline?: string
+  location?: string
+  categories?: string
+  listedBy?: string
+  application_link?: string | undefined
 }
 
 type Props = {

@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react';
 import OpportunityCard from './opportunityCard'
 import { createClient } from '@/utils/supabase/client'
 import {
@@ -9,35 +10,32 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card'
+
 const supabase = createClient();
-const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
-  }
-/*const mockOpportunities = [
-  {
-    id: 'abc123',
-    title: 'Join the AI Research Lab',
-    description: 'Work on cutting-edge machine learning projects with UCSC faculty.',
-    deadline: "Nov 4th",
-    location: "sc",
-    categories: "cs, ce",
-    listedBy: 'Dr. Nguyen',
-    application_link: 'Apply here',
-  },
-  {
-    id: 'def456',
-    title: 'Environmental Action Club',
-    description: 'Help organize campus events and advocate for sustainability.',
-    deadline: "Nov 4th",
-    location: "sc",
-    categories: "cs, ce",
-    listedBy: 'Dr. Nguyen',
-    application_link: 'Apply here',
-  },
-]
-*/
+
 export default function OpportunitiesPage() {
+  const [fetchError, setFetchError] = useState<any>(null);
+  const [opportunities, setOpportunities] = useState<any>(null);
+
+  useEffect(()=> {
+    const fetchOpportunities = async () => {
+    const { data, error } = await supabase.from("opportunities").select()
+
+    if (error) {
+      console.error('Error fetching data:', error);
+      setFetchError('Error fetching data');
+      setOpportunities(null);
+
+    }
+    if (data) {
+    setOpportunities(data);
+    setFetchError(null);
+    console.log(data)
+    }
+  }
+  fetchOpportunities()
+},[]) 
+
   return (
     <div className="container mx-auto py-8 px-4 max-w-2xl">
       <Card>
@@ -48,8 +46,8 @@ export default function OpportunitiesPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {mockOpportunities.map((opportunity) => (
-            <OpportunityCard key={opportunity.id} opportunity={opportunity} />
+          {opportunities && opportunities.map((opportunities: { id: any; title?: string; description?: string; deadline?: string; location?: string; categories?: string; listedBy?: string; application_link?: string | undefined; }) => (
+            <OpportunityCard key={opportunities.id} opportunity={opportunities} />
           ))}
         </CardContent>
       </Card>
