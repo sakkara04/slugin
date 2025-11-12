@@ -3,6 +3,7 @@
 import { createClient } from "@/utils/supabase/server"
 import { Button } from "@/components/ui/button"
 import { redirect } from "next/navigation"
+import Navbar from "@/components/ui/navbar"
 
 export default async function HomePage() {
     const supabase = await createClient()
@@ -25,13 +26,17 @@ export default async function HomePage() {
 
     return (
         <div>
-            <h1>Home page!</h1>
-            <h2>Welcome, { first_name }.</h2>
-            <form action="/auth/signout" method="post">
-                <Button variant="outline" type="submit">
-                    Sign out
-                </Button>
-            </form>
+            <Navbar />
+            <main style={{ padding: 30 }}>
+                <div style={{ display: 'flex', gap: 20 }}>
+                    <div style={{ width: '60%' }}>
+                        <h1 className="text-3xl">Welcome, { first_name }.</h1>
+                        <p className="text-2xl"> This is the home page. More features coming soon! </p>
+                        <p className="text-lg">Looking for ways to get involved, build experience, or explore what’s out there? Our platform helps UCSC students discover up-to-date campus jobs, research openings, internships, and events—all tailored to your interests. Whether you’re just getting started or ready to level up, we make it easy to find opportunities that help you grow and make the most of your time at Santa Cruz.</p>
+                    </div>
+                    <div style={{ flex: 1 }} />
+                </div>
+            </main>
         </div>
     )
 }

@@ -75,7 +75,7 @@ export default function OpportunityCard({ opportunity }: Props) {
             href={opportunity.application_link}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue underline hover:text-dark-blue transition"
+            className="text-black underline hover:text-[#1246d4] transition"
           >
             Apply Here
           </a>
