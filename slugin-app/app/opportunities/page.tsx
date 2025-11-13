@@ -1,5 +1,6 @@
 'use client'
 
+import { Button } from '@/components/ui/button'
 import OpportunityCard from './opportunityCard'
 import {
   Card,
@@ -8,6 +9,16 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuRadioGroup,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import React from 'react'
 
 const mockOpportunities = [
   {
@@ -27,13 +38,30 @@ const mockOpportunities = [
 ]
 
 export default function OpportunitiesPage() {
+  const [position, setPosition] = React.useState("")
+
   return (
     <div className="container mx-auto py-8 px-4 max-w-2xl">
       <Card>
         <CardHeader>
+          <div className = "flex justify-between">
           <CardTitle className="text-2xl">Available Opportunities</CardTitle>
+          <Button>
+          <DropdownMenu>
+              <DropdownMenuTrigger>Sort By ↓</DropdownMenuTrigger>
+              <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
+              <DropdownMenuContent>
+                <DropdownMenuItem>Most recently posted</DropdownMenuItem>
+                <DropdownMenuItem>Oldest Posting</DropdownMenuItem>
+                <DropdownMenuItem>Oldest Due Date</DropdownMenuItem>
+                <DropdownMenuItem>Newest Due Date</DropdownMenuItem>
+              </DropdownMenuContent>
+              </DropdownMenuRadioGroup>
+            </DropdownMenu>
+          </Button>
+          </div>
           <CardDescription>
-            Browse and mark opportunities you’ve applied to
+            Browse and mark opportunities you've applied to
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
