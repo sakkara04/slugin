@@ -1,15 +1,17 @@
-'use client'
+"use client";
 
 import { useEffect, useState } from 'react';
 import OpportunityCard from './opportunityCard'
 import { createClient } from '@/utils/supabase/client'
+import Navbar from "@/components/ui/navbar";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from '@/components/ui/card'
+} from "@/components/ui/card";
+import { Nav } from "react-bootstrap";
 
 const supabase = createClient();
 
@@ -37,6 +39,8 @@ export default function OpportunitiesPage() {
 },[]) 
 
   return (
+   <div>
+    <Navbar />
     <div className="container mx-auto py-8 px-4 max-w-2xl">
       <Card>
         <CardHeader>
@@ -52,5 +56,6 @@ export default function OpportunitiesPage() {
         </CardContent>
       </Card>
     </div>
-  )
+   </div>
+  );
 }
