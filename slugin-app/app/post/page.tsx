@@ -28,7 +28,7 @@ export default async function PostPage() {
 
   // Redirect to signin if no user
   if (!user) {
-    // redirect('/signin') // commented out for dev purposes
+    redirect('/signin')
   }
 
   // Redirect to email verification if email is not confirmed
@@ -109,8 +109,6 @@ export default async function PostPage() {
                 />
               </Field>
               
-           
-
               <Field>
                 <FieldLabel htmlFor="categories">Categories/Tags</FieldLabel>
                 <Input
