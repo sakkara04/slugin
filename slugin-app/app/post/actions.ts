@@ -18,7 +18,6 @@ export async function postOpportunity(formData: FormData) {
     // redirect('/signin') // commented out for dev purposes
   }
 
-  // Get form data
   const title = formData.get('title') as string
   const description = formData.get('description') as string
   const deadline = formData.get('deadline') as string
@@ -28,11 +27,11 @@ export async function postOpportunity(formData: FormData) {
   const file = formData.get('file') as File | null
 
   // TODO: Implement database insertion
-  // This will need to:
-  // 1. Parse categories (comma-separated string into array or separate table)
-  // 2. Handle file upload to Supabase Storage if file is provided
-  // 3. Insert opportunity data into database table
-  // 4. Handle errors appropriately
+  // need to:
+  // Parse categories (comma-separated string into array or separate table)
+  // Handle file upload to Supabase Storage if file is provided
+  // Insert opportunity data into database table
+  
 
   console.log('Opportunity data:', {
     title,
@@ -46,7 +45,6 @@ export async function postOpportunity(formData: FormData) {
   })
 
   // For now, just redirect to home
-  // Once database is set up, redirect to the posted opportunity page or home
   revalidatePath('/post')
   revalidatePath('/home')
   redirect('/home')
