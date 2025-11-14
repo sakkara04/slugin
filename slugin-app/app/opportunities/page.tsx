@@ -19,10 +19,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import React from 'react'
-import { Nav } from "react-bootstrap";
 
 const supabase = createClient();
 
@@ -49,7 +49,7 @@ export default function OpportunitiesPage() {
   fetchOpportunities()
 },[]) 
 
-  const [position, setPosition] = React.useState("")
+  const [position, setPosition] = React.useState("Newest to Oldest Post")
 
   return (
    <div>
@@ -61,15 +61,15 @@ export default function OpportunitiesPage() {
           <CardTitle className="text-2xl">Available Opportunities</CardTitle>
           <Button>
           <DropdownMenu>
-              <DropdownMenuTrigger>Sort By ↓</DropdownMenuTrigger>
-              <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
+              <DropdownMenuTrigger>Sort By:  {position} ↓</DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem>Most recently posted</DropdownMenuItem>
-                <DropdownMenuItem>Oldest Posting</DropdownMenuItem>
-                <DropdownMenuItem>Oldest Due Date</DropdownMenuItem>
-                <DropdownMenuItem>Newest Due Date</DropdownMenuItem>
-              </DropdownMenuContent>
+                <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
+                <DropdownMenuRadioItem value={"Newest to Oldest Post"}>Newest to Oldest Post</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value={"Oldest to Newest Post"}>Oldest to Newest Post</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value={"Earliest to Latest Due Date"}>Earliest to Latest Due Date</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value={"Latest to Earliest Due Date"}>Latest to Earliest Due Date</DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
             </DropdownMenu>
           </Button>
           </div>
