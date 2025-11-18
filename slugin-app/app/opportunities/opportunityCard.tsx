@@ -13,11 +13,14 @@ import {
 } from '@/components/ui/card'
 
 type Opportunity = {
-  id: string
-  title: string
-  description: string
-  professor: string
-  application_link?: string
+  id: any
+  title?: string
+  description?: string
+  deadline?: string
+  location?: string
+  categories?: string
+  listedBy?: string
+  application_link?: string | undefined
 }
 
 type Props = {
@@ -67,15 +70,33 @@ export default function OpportunityCard({ opportunity }: Props) {
         <CardDescription>{opportunity.description}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">
+        {/* catgeory, file upload */}
         <p className="text-sm">
-          <strong>Professor:</strong> {opportunity.professor}
+          <strong>Deadline:</strong> {opportunity.deadline}
+        </p>
+        <p className="text-sm">
+          <strong>Location:</strong> {opportunity.location}
+        </p>
+        <p className="text-sm">
+          <strong>Listed By:</strong> {opportunity.listedBy}
+        </p>
+        <p>
+          {opportunity.application_link && (
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-dark-blue underline hover:text-dark-blue transition"
+          >
+            View Flyer Here
+          </a>
+        )}
         </p>
         {opportunity.application_link && (
           <a
             href={opportunity.application_link}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-black underline hover:text-[#1246d4] transition"
+            className="text-dark-blue underline hover:text-dark-blue transition"
           >
             Apply Here
           </a>
