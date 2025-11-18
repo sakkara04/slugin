@@ -43,10 +43,31 @@ export async function postOpportunity(formData: FormData) {
     userId: user.id,
   })
 
-  // For now, just redirect to home
-  // Once database is set up, redirect to the posted opportunity page or home
-  revalidatePath('/post')
-  revalidatePath('/home')
-  redirect('/home')
+  // Build row to insert. Keep categories as a comma-separated string for now.
+  const row: Record<string, any> = {
+    title,
+    description,
+    deadline: deadline || null,
+    location,
+    categories,
+    user_id: user?.id,
+  }
+
+  try {
+    const { error } = await supabase.from('opportunities').insert(row)
+    if (error) {
+      console.error('Error inserting opportunity:', error)
+      revalidatePath('/post')
+      return
+    }
+
+    // Revalidate the post page so server-rendered list updates.
+    revalidatePath('/post')
+    return
+  } catch (err) {
+    console.error('Unexpected error inserting opportunity:', err)
+    revalidatePath('/post')
+    return
+  }
 }
 

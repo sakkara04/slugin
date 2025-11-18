@@ -31,6 +31,10 @@ const Navbar: React.FC = () => {
           <Button variant="ghost">Opportunities</Button>
         </Link>
 
+        <Link href="/post" className="nav-link">
+          <Button variant="ghost">Post Opportunities</Button>
+        </Link>
+
         <Link href="/profile" className="nav-link">
           <Button variant="ghost">Edit / Create Profile</Button>
         </Link>
