@@ -24,14 +24,6 @@ type Opportunity = {
   categories?: string
   listedBy?: string
   status: string
-  id: any
-  title?: string
-  description?: string
-  deadline?: string
-  location?: string
-  categories?: string
-  listedBy?: string
-  application_link?: string | undefined
 }
 
 type Props = {

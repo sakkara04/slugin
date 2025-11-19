@@ -11,7 +11,6 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Nav } from "react-bootstrap";
 
 const mockOpportunities = [
   {
