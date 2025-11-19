@@ -24,6 +24,14 @@ type Opportunity = {
   categories?: string
   listedBy?: string
   status: string
+  id: any
+  title?: string
+  description?: string
+  deadline?: string
+  location?: string
+  categories?: string
+  listedBy?: string
+  application_link?: string | undefined
 }
 
 type Props = {
@@ -75,6 +83,7 @@ export default function OpportunityCard({ opportunity }: Props) {
         <CardDescription>{opportunity.description}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">
+        {/* catgeory, file upload */}
         <p className="text-sm">
           <strong>Deadline:</strong> {opportunity.deadline}
         </p>
@@ -89,7 +98,7 @@ export default function OpportunityCard({ opportunity }: Props) {
             href={opportunity.application_link}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue underline hover:text-dark-blue transition"
+            className="text-dark-blue underline hover:text-dark-blue transition"
           >
             Apply Here
           </a>
