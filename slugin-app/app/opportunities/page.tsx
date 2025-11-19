@@ -6,104 +6,104 @@ import OpportunityCard from './opportunityCard'
 import { createClient } from '@/utils/supabase/client'
 import Navbar from "@/components/ui/navbar";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
+ Card,
+ CardContent,
+ CardHeader,
+ CardTitle,
+ CardDescription,
 } from "@/components/ui/card";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
+ DropdownMenu,
+ DropdownMenuContent,
+ DropdownMenuRadioGroup,
+ DropdownMenuRadioItem,
+ DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import React from 'react'
 
 export default function OpportunitiesPage() {
-  const [fetchError, setFetchError] = useState<any>(null);
-  const [opportunities, setOpportunities] = useState<any>(null);
-  const [position, setPosition] = React.useState("Newest to Oldest Post")
+ const supabase = createClient()
 
-  useEffect(()=> {
-    const fetchOpportunities = async () => {
-      const { data, error } = await supabase.from("opportunities").select();
+ const [fetchError, setFetchError] = useState<any>(null);
+ const [opportunities, setOpportunities] = useState<any>(null);
+ const [position, setPosition] = React.useState("Newest to Oldest Post")
 
-      if (error) {
-        console.error('Error fetching data:', error);
-        setFetchError('Error fetching data');
-        setOpportunities(null);
+ useEffect(()=> {
+   const fetchOpportunities = async () => {
+     const { data, error } = await supabase.from("opportunities").select(`*, profiles (first_name)`);
 
-      }
-      if (data) {
-      setOpportunities(data);
-      setFetchError(null);
-      console.log(data)
-      }
-    }
-    fetchOpportunities()
-  },[position])
+     if (error) {
+       console.error('Error fetching data:', error);
+       setFetchError('Error fetching data');
+       setOpportunities(null);
 
-  //This const was created using ChatGPT's help to brainstorm the sorting logic of the opportunities
-  const sortedOpportunities = opportunities ? [...opportunities].sort((a, b) => { if (position == "Earliest to Latest Due Date"){
-          return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
-      }
-      else if (position == "Latest to Earliest Due Date"){
-          return new Date(b.deadline).getTime() - new Date(a.deadline).getTime();
-      }
-      else if (position == "Oldest to Newest Post"){
-          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-      }
-      else {
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      }
-  }): [];
-  
+     }
+     if (data) {
+     setOpportunities(data);
+     setFetchError(null);
+     console.log(data)
+     }
+   }
+   fetchOpportunities()
+ },[position])
+
+ //This const was created using ChatGPT's help to brainstorm the sorting logic of the opportunities
+ const sortedOpportunities = opportunities ? [...opportunities].sort((a, b) => { if (position == "Earliest to Latest Due Date"){
+         return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+     }
+     else if (position == "Latest to Earliest Due Date"){
+         return new Date(b.deadline).getTime() - new Date(a.deadline).getTime();
+     }
+     else if (position == "Oldest to Newest Post"){
+         return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+     }
+     else {
+         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+     }
+ }): [];
+
   // US 3.1 - Task 3: update status based on deadline
-  const currentDate = new Date()
-  const updatedOpportunities = sortedOpportunities.map(opp => ({
-    ...opp,
-    status: new Date(opp.deadline) < currentDate ? 'Archived' : 'Active' //converted string to date
-  }))
+ const currentDate = new Date()
+ const updatedOpportunities = sortedOpportunities.map(opp => ({
+   ...opp,
+   status: new Date(opp.deadline) < currentDate ? 'Archived' : 'Active' //converted string to date
+ }))
 
-  const activeOpportunities = updatedOpportunities.filter(
-    opp => opp.status === 'Active'
-  )
+ const activeOpportunities = updatedOpportunities.filter(
+   opp => opp.status === 'Active'
+ )
 
-  return (
-   <div>
-    <Navbar />
-    <div className="container mx-auto py-8 px-4 max-w-2xl">
-      <Card>
-        <CardHeader>
-          <div className = "flex justify-between">
-          <CardTitle className="text-2xl">Available Opportunities</CardTitle>
-          <Button>
-          <DropdownMenu>
-              <DropdownMenuTrigger>Sort By:  {position} ↓</DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
-                <DropdownMenuRadioItem value={"Newest to Oldest Post"}>Newest to Oldest Post</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value={"Oldest to Newest Post"}>Oldest to Newest Post</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value={"Earliest to Latest Due Date"}>Earliest to Latest Due Date</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value={"Latest to Earliest Due Date"}>Latest to Earliest Due Date</DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </Button>
-          </div>
-          <CardDescription>
-            Browse and mark opportunities you've applied to
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {activeOpportunities && activeOpportunities.map((opportunity) => (
-            <OpportunityCard key={opportunity.id} opportunity={opportunity} />
-          ))}
-        </CardContent>
-      </Card>
-    </div>
+ return (
+  <div>
+   <Navbar />
+   <div className="container mx-auto py-8 px-4 max-w-2xl">
+     <Card>
+       <CardHeader>
+         <div className = "flex justify-between">
+         <CardTitle className="text-2xl">Available Opportunities</CardTitle>
+         <DropdownMenu>
+             <DropdownMenuTrigger asChild><Button>Sort By:  {position} ↓</Button></DropdownMenuTrigger>
+             <DropdownMenuContent>
+               <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
+               <DropdownMenuRadioItem value={"Newest to Oldest Post"}>Newest to Oldest Post</DropdownMenuRadioItem>
+               <DropdownMenuRadioItem value={"Oldest to Newest Post"}>Oldest to Newest Post</DropdownMenuRadioItem>
+               <DropdownMenuRadioItem value={"Earliest to Latest Due Date"}>Earliest to Latest Due Date</DropdownMenuRadioItem>
+               <DropdownMenuRadioItem value={"Latest to Earliest Due Date"}>Latest to Earliest Due Date</DropdownMenuRadioItem>
+             </DropdownMenuRadioGroup>
+             </DropdownMenuContent>
+           </DropdownMenu>
+         </div>
+         <CardDescription>
+           Browse and mark opportunities you've applied to
+         </CardDescription>
+       </CardHeader>
+       <CardContent className="space-y-6">
+         {activeOpportunities && activeOpportunities.map((opportunity) => (
+           <OpportunityCard key={opportunity.id} opportunity={opportunity} />
+         ))}
+       </CardContent>
+     </Card>
    </div>
-  );
+  </div>
+ );
 }
