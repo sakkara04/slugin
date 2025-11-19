@@ -15,9 +15,6 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
@@ -29,27 +26,41 @@ const supabase = createClient();
 export default function OpportunitiesPage() {
   const [fetchError, setFetchError] = useState<any>(null);
   const [opportunities, setOpportunities] = useState<any>(null);
+  const [position, setPosition] = React.useState("Newest to Oldest Post")
 
   useEffect(()=> {
     const fetchOpportunities = async () => {
-    const { data, error } = await supabase.from("opportunities").select()
+      const { data, error } = await supabase.from("opportunities").select();
 
-    if (error) {
-      console.error('Error fetching data:', error);
-      setFetchError('Error fetching data');
-      setOpportunities(null);
+      if (error) {
+        console.error('Error fetching data:', error);
+        setFetchError('Error fetching data');
+        setOpportunities(null);
 
+      }
+      if (data) {
+      setOpportunities(data);
+      setFetchError(null);
+      console.log(data)
+      }
     }
-    if (data) {
-    setOpportunities(data);
-    setFetchError(null);
-    console.log(data)
-    }
-  }
-  fetchOpportunities()
-},[]) 
+    fetchOpportunities()
+  },[position])
 
-  const [position, setPosition] = React.useState("Newest to Oldest Post")
+  //This const was created using ChatGPT's help to brainstorm the sorting logic of the opportunities
+  const sortedOpportunities = opportunities ? [...opportunities].sort((a, b) => { if (position == "Earliest to Latest Due Date"){
+          return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+      }
+      else if (position == "Latest to Earliest Due Date"){
+          return new Date(b.deadline).getTime() - new Date(a.deadline).getTime();
+      }
+      else if (position == "Oldest to Newest Post"){
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      }
+      else {
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+  }): [];
 
   return (
    <div>
@@ -78,9 +89,8 @@ export default function OpportunitiesPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {opportunities && opportunities.map((opportunities: { id: any; title?: string; description?: string; deadline?: string; location?: string; categories?: string; listedBy?: string; application_link?: string | undefined; }) => (
-            <OpportunityCard key={opportunities.id} opportunity={opportunities} />
-          ))}
+         {sortedOpportunities && sortedOpportunities.map((opportunities: { id: any; title?: string; description?: string; deadline?: string; location?: string; categories?: string; listedBy?: string; application_link?: string | undefined; }) => (
+           <OpportunityCard key={opportunities.id} opportunity={opportunities} />))}
         </CardContent>
       </Card>
     </div>
