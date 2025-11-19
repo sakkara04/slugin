@@ -21,8 +21,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import React from 'react'
 
-const supabase = createClient();
-
 export default function OpportunitiesPage() {
   const [fetchError, setFetchError] = useState<any>(null);
   const [opportunities, setOpportunities] = useState<any>(null);
@@ -61,6 +59,17 @@ export default function OpportunitiesPage() {
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
   }): [];
+  
+  // US 3.1 - Task 3: update status based on deadline
+  const currentDate = new Date()
+  const updatedOpportunities = sortedOpportunities.map(opp => ({
+    ...opp,
+    status: new Date(opp.deadline) < currentDate ? 'Archived' : 'Active' //converted string to date
+  }))
+
+  const activeOpportunities = updatedOpportunities.filter(
+    opp => opp.status === 'Active'
+  )
 
   return (
    <div>
@@ -89,8 +98,9 @@ export default function OpportunitiesPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-         {sortedOpportunities && sortedOpportunities.map((opportunities: { id: any; title?: string; description?: string; deadline?: string; location?: string; categories?: string; listedBy?: string; application_link?: string | undefined; }) => (
-           <OpportunityCard key={opportunities.id} opportunity={opportunities} />))}
+          {activeOpportunities && activeOpportunities.map((opportunity) => (
+            <OpportunityCard key={opportunity.id} opportunity={opportunity} />
+          ))}
         </CardContent>
       </Card>
     </div>

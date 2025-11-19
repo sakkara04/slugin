@@ -18,6 +18,9 @@ import {
 import { Input } from "@/components/ui/input"
 import { redirect } from "next/navigation"
 import { postOpportunity } from "./actions"
+import Navbar from "@/components/ui/navbar"
+import Link from "next/link"
+import UserOpportunitiesClient from '@/components/opportunities/UserOpportunitiesClient'
 
 export default async function PostPage() {
   const supabase = await createClient()
@@ -36,9 +39,29 @@ export default async function PostPage() {
     redirect(`/verify-email?email=${encodeURIComponent(user.email || '')}`)
   }
 
+  // Fetch opportunities created by the current authenticated user, newest first
+  let userOpportunities: any[] = []
+  if (user) {
+    const { data, error } = await supabase
+      .from('opportunities')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Error fetching user opportunities:', error)
+    } else if (data) {
+      userOpportunities = data
+    }
+  }
+
   return (
-    <div className="container mx-auto py-8 px-4 max-w-2xl">
-      <Card>
+    <div>
+      <Navbar />
+      <div style={{ display: 'flex', gap: 24, padding: '24px' }}>
+        <div style={{ width: '50%' }}>
+          <div className="container mx-auto py-8 px-4 max-w-2xl">
+            <Card>
         <CardHeader>
           <CardTitle className="text-2xl">Post an Opportunity</CardTitle>
           <CardDescription>
@@ -144,7 +167,17 @@ export default async function PostPage() {
             </FieldGroup>
           </form>
         </CardContent>
-      </Card>
+  </Card>
+          </div>
+        </div>
+
+        <div style={{ width: '50%' }}>
+          <h2 className="text-xl mb-4">Your Opportunities</h2>
+          {/* Client-side list + edit modal */}
+          {/* @ts-ignore-next-line Server component passing data to client */}
+          <UserOpportunitiesClient initial={userOpportunities} />
+        </div>
+      </div>
     </div>
   )
 }
