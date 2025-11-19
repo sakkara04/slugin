@@ -20,6 +20,7 @@ type Opportunity = {
   professor: string
   application_link?: string
   deadline: Date
+  status: string
 }
 
 type Props = {
@@ -62,7 +63,7 @@ export default function OpportunityCard({ opportunity }: Props) {
     if (!error) setApplied(true)
   }
   const currentDate = new Date();
-  const active = (opportunity.deadline > currentDate);
+  const active = (opportunity.status === 'Active');
   return (
     <Card>
       <CardHeader>
