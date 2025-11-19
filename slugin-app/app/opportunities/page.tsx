@@ -20,8 +20,11 @@ const mockOpportunities = [
     description: 'Work on cutting-edge machine learning projects with UCSC faculty.',
     professor: 'Dr. Nguyen',
     application_link: 'Apply here',
-    deadline: new Date('2025-12-31'), // Future date - Active
+    deadline: '2025-12-31', //changed to string
     status: 'Active',
+    location: 'Engineering 2',
+    categories: 'Research',
+    listedBy: 'Dr. Nguyen',
   },
   {
     id: 'def456',
@@ -29,8 +32,11 @@ const mockOpportunities = [
     description: 'Help organize campus events and advocate for sustainability.',
     professor: 'Prof. Martinez',
     application_link: 'Apply here',
-    deadline: new Date('2025-11-15'), //this should not show now
+    deadline: '2025-11-25', //changed to string
     status: 'Active',
+    location: 'Earth & Marine Sciences',
+    categories: 'Club',
+    listedBy: 'Prof. Martinez',
   },
   {
     id: 'ghi789',
@@ -38,8 +44,11 @@ const mockOpportunities = [
     description: 'Already expired opportunity for testing.',
     professor: 'Dr. Smith',
     application_link: 'Apply here',
-    deadline: new Date('2025-01-01'), //this should not show now
+    deadline: '2025-01-01', // Changed to string - this should not show now
     status: 'Archived',
+    location: 'Baskin Engineering', // Added
+    categories: 'Research', // Added
+    listedBy: 'Dr. Smith', // Added
   },
 ]
 
@@ -49,7 +58,7 @@ export default function OpportunitiesPage() {
   const currentDate = new Date()
   const updatedOpportunities = mockOpportunities.map(opp => ({
     ...opp,
-    status: opp.deadline < currentDate ? 'Archived' : 'Active'
+    status: new Date(opp.deadline) < currentDate ? 'Archived' : 'Active' //converted string to date
   }))
 
   const activeOpportunities = updatedOpportunities.filter(

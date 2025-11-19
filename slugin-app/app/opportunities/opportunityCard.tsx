@@ -14,12 +14,15 @@ import {
 import { Label } from '@/components/ui/label'
 
 type Opportunity = {
-  id: string
-  title: string
-  description: string
-  professor: string
+  id: any
+  title?: string
+  description?: string
+  professor?: string
   application_link?: string
-  deadline: Date
+  deadline?: string
+  location?: string
+  categories?: string
+  listedBy?: string
   status: string
   id: any
   title?: string
@@ -70,8 +73,9 @@ export default function OpportunityCard({ opportunity }: Props) {
 
     if (!error) setApplied(true)
   }
-  const currentDate = new Date();
-  const active = (opportunity.status === 'Active');
+
+  const active = opportunity.status === 'Active'
+
   return (
     <Card>
       <CardHeader>
@@ -89,17 +93,6 @@ export default function OpportunityCard({ opportunity }: Props) {
         <p className="text-sm">
           <strong>Listed By:</strong> {opportunity.listedBy}
         </p>
-        <p>
-          {opportunity.application_link && (
-          <a
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-dark-blue underline hover:text-dark-blue transition"
-          >
-            View Flyer Here
-          </a>
-        )}
-        </p>
         {opportunity.application_link && (
           <a
             href={opportunity.application_link}
@@ -115,7 +108,7 @@ export default function OpportunityCard({ opportunity }: Props) {
             {applied ? 'Applied' : 'Mark Applied'}
           </Button>
         )}
-        <Label>{active ? 'Active' : 'Expired' }</Label>
+        <Label>{active ? 'Active' : 'Expired'}</Label>
       </CardContent>
     </Card>
   )
