@@ -11,8 +11,16 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
 
 type Opportunity = {
+  id: string
+  title: string
+  description: string
+  professor: string
+  application_link?: string
+  deadline: Date
+  status: string
   id: any
   title?: string
   description?: string
@@ -62,7 +70,8 @@ export default function OpportunityCard({ opportunity }: Props) {
 
     if (!error) setApplied(true)
   }
-
+  const currentDate = new Date();
+  const active = (opportunity.status === 'Active');
   return (
     <Card>
       <CardHeader>
@@ -106,6 +115,7 @@ export default function OpportunityCard({ opportunity }: Props) {
             {applied ? 'Applied' : 'Mark Applied'}
           </Button>
         )}
+        <Label>{active ? 'Active' : 'Expired' }</Label>
       </CardContent>
     </Card>
   )

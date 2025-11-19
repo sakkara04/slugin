@@ -13,30 +13,48 @@ import {
 } from "@/components/ui/card";
 import { Nav } from "react-bootstrap";
 
-const supabase = createClient();
+const mockOpportunities = [
+  {
+    id: 'abc123',
+    title: 'Join the AI Research Lab',
+    description: 'Work on cutting-edge machine learning projects with UCSC faculty.',
+    professor: 'Dr. Nguyen',
+    application_link: 'Apply here',
+    deadline: new Date('2025-12-31'), // Future date - Active
+    status: 'Active',
+  },
+  {
+    id: 'def456',
+    title: 'Environmental Action Club',
+    description: 'Help organize campus events and advocate for sustainability.',
+    professor: 'Prof. Martinez',
+    application_link: 'Apply here',
+    deadline: new Date('2025-11-15'), //this should not show now
+    status: 'Active',
+  },
+  {
+    id: 'ghi789',
+    title: 'Summer Research Program',
+    description: 'Already expired opportunity for testing.',
+    professor: 'Dr. Smith',
+    application_link: 'Apply here',
+    deadline: new Date('2025-01-01'), //this should not show now
+    status: 'Archived',
+  },
+]
 
+
+// US 3.1 - Task 3: update status based on deadline
 export default function OpportunitiesPage() {
-  const [fetchError, setFetchError] = useState<any>(null);
-  const [opportunities, setOpportunities] = useState<any>(null);
+  const currentDate = new Date()
+  const updatedOpportunities = mockOpportunities.map(opp => ({
+    ...opp,
+    status: opp.deadline < currentDate ? 'Archived' : 'Active'
+  }))
 
-  useEffect(()=> {
-    const fetchOpportunities = async () => {
-    const { data, error } = await supabase.from("opportunities").select()
-
-    if (error) {
-      console.error('Error fetching data:', error);
-      setFetchError('Error fetching data');
-      setOpportunities(null);
-
-    }
-    if (data) {
-    setOpportunities(data);
-    setFetchError(null);
-    console.log(data)
-    }
-  }
-  fetchOpportunities()
-},[]) 
+  const activeOpportunities = updatedOpportunities.filter(
+    opp => opp.status === 'Active'
+  )
 
   return (
    <div>
@@ -46,12 +64,12 @@ export default function OpportunitiesPage() {
         <CardHeader>
           <CardTitle className="text-2xl">Available Opportunities</CardTitle>
           <CardDescription>
-            Browse and mark opportunities you’ve applied to
+            Browse and mark opportunities you've applied to
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {opportunities && opportunities.map((opportunities: { id: any; title?: string; description?: string; deadline?: string; location?: string; categories?: string; listedBy?: string; application_link?: string | undefined; }) => (
-            <OpportunityCard key={opportunities.id} opportunity={opportunities} />
+          {activeOpportunities.map((opportunity) => (
+            <OpportunityCard key={opportunity.id} opportunity={opportunity} />
           ))}
         </CardContent>
       </Card>
