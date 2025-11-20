@@ -36,8 +36,7 @@ export async function postOpportunity(formData: FormData) {
   if (!title || !description || !deadline || !link || !location || !categories) {
     console.error('Missing required fields')
     // Revalidate and return to show the error state or redirect back to the form
-    revalidatePath('/post') 
-    return { error: 'Please fill out all required fields.' }
+    revalidatePath('/post')
   }
 
   // --- 2. File Upload Handling (from 'main' branch logic) ---
@@ -46,31 +45,28 @@ export async function postOpportunity(formData: FormData) {
     if (file.size > MAX_FILE_SIZE) {
       console.error('File size exceeds 5MB limit')
       revalidatePath('/post')
-      return { error: 'File size exceeds 5MB limit.' }
     }
 
     const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
     if (!ALLOWED_TYPES.includes(file.type)) {
       console.error('Invalid file type, only image files (JPEG, PNG, GIF, WebP) are allowed')
       revalidatePath('/post')
-      return { error: 'Invalid file type. Only images are allowed.' }
     }
-    
+
     // Upload file to Supabase Storage
     const filePath = `${user.id}/${Date.now()}-${file.name}`
     const { error: uploadError } = await supabase.storage.from('flyers').upload(filePath, file)
-    
+
     if (uploadError) {
       console.error('File upload error:', uploadError)
       revalidatePath('/post')
-      return { error: 'Failed to upload file.' }
     }
-    
+
     // Get the public URL for the uploaded file
     const { data } = supabase.storage.from('flyers').getPublicUrl(filePath)
     fileUrl = data.publicUrl
   }
-  
+
   // --- 3. Database Insertion (combining 'christina-US3.3-Task2' and 'main' logic) ---
   const row = {
     title,
@@ -89,18 +85,18 @@ export async function postOpportunity(formData: FormData) {
     if (error) {
       console.error('Error inserting opportunity:', error)
       revalidatePath('/post')
-      return { error: 'Failed to save opportunity to database.' }
+      return
     }
-
-    // --- 4. Success and Redirect (from 'main' branch logic) ---
-    console.log('Successfully created post!')
-    // Revalidate the /post page (to update the user's list of posts) and redirect
-    revalidatePath('/post')
-    redirect('/opportunities')
 
   } catch (err) {
     console.error('Unexpected error inserting opportunity:', err)
     revalidatePath('/post')
-    return { error: 'An unexpected server error occurred.' }
+    return
   }
+
+  // --- 4. Success and Redirect (from 'main' branch logic) ---
+  console.log('Successfully created post!')
+  // Revalidate the /post page (to update the user's list of posts) and redirect
+  revalidatePath('/post')
+  redirect('/opportunities')
 }
