@@ -102,6 +102,15 @@ export default function OpportunitiesPage() {
          <CardDescription>
            Browse and mark opportunities you've applied to
          </CardDescription>
+         {/* Add the suggested opportunities toggle button here */}
+         <div className="mt-4">
+           <Button 
+             onClick={() => setShowSuggested(!showSuggested)}
+             variant={showSuggested ? "default" : "outline"}
+           >
+             {showSuggested ? "Show All Opportunities" : "Show Suggested Opportunities"}
+           </Button>
+         </div>
        </CardHeader>
        <CardContent className="space-y-6">
         {(showSuggested ? suggestedOpportunities : activeOpportunities).map((opportunity) => (
