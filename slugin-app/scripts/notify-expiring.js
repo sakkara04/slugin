@@ -72,6 +72,18 @@ async function run() {
       const to = profile?.email;
       if (!to) continue;
 
+      // Non-email side: insert notification to Supabase when 2 days left
+        if (days === 2) {
+              await supabase.from('notifications').insert({
+                user_id: opp.user_id,
+                opportunity_id: opp.id,
+                type: 'deadline_warning',
+                message: `Your opportunity "${opp.title}" is expiring in 2 days.`,
+                created_at: new Date().toISOString()
+            });
+            console.log(`📌 Inserted notification for ${opp.title}`);
+        }
+
       const editUrl = `https://yourdomain.com/opportunities/${opp.id}/edit`;
       const subject = `Your opportunity is about to expire (${days} days left)`;
       const html = `
