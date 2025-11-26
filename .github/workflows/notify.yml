@@ -1,6 +1,10 @@
 name: Daily Notifications
 
 on:
+  push:
+    branches:
+      - main
+      - aashna-emails
   schedule:
     - cron: "0 17 * * *"   # every day at 9am PST (17:00 UTC)
   workflow_dispatch:        # allow manual runs too
