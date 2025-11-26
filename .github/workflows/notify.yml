@@ -6,7 +6,10 @@ on:
   #     - main
   #     - aashna-emails
   schedule:
-    - cron: "0 17 * * *"   # every day at 9am PST (17:00 UTC)
+    # Runs every morning at 8 AM PST (4pm UTC)
+    - cron: '0 16 * * *'
+    # Runs every day at noon (12 PM) PST for testing (8pm UTC)
+    - cron: '0 20 * * *'
   workflow_dispatch:        # allow manual runs too
 
 jobs:
