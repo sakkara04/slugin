@@ -27,6 +27,7 @@ jobs:
         run: npm install
 
       - name: Run notification script
+        working-directory: slugin-app
         run: node scripts/notify-expiring.js
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
