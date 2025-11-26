@@ -28,6 +28,9 @@ export default function OpportunitiesPage() {
  const [opportunities, setOpportunities] = useState<any>(null);
  const [position, setPosition] = React.useState("Newest to Oldest Post")
 
+ //suggested opportunities button
+ const [showSuggested, setShowSuggested] = useState(false)
+
  useEffect(()=> {
    const fetchOpportunities = async () => {
      const { data, error } = await supabase.from("opportunities").select(`*, profiles (first_name)`);
@@ -71,7 +74,10 @@ export default function OpportunitiesPage() {
 
  const activeOpportunities = updatedOpportunities.filter(
    opp => opp.status === 'Active'
- )
+ );
+
+ const suggestedOpportunities = activeOpportunities.filter((opp) => opp.categories?.toLowerCase().includes("research"));
+
 
  return (
   <div>
@@ -96,12 +102,21 @@ export default function OpportunitiesPage() {
          <CardDescription>
            Browse and mark opportunities you've applied to
          </CardDescription>
+         {/* Add the suggested opportunities toggle button here */}
+         <div className="mt-4">
+           <Button 
+             onClick={() => setShowSuggested(!showSuggested)}
+             variant={showSuggested ? "default" : "outline"}
+           >
+             {showSuggested ? "Show All Opportunities" : "Show Suggested Opportunities"}
+           </Button>
+         </div>
        </CardHeader>
        <CardContent className="space-y-6">
-         {activeOpportunities && activeOpportunities.map((opportunity) => (
-           <OpportunityCard key={opportunity.id} opportunity={opportunity} />
-         ))}
-       </CardContent>
+        {(showSuggested ? suggestedOpportunities : activeOpportunities).map((opportunity) => (
+          <OpportunityCard key={opportunity.id} opportunity={opportunity} />
+          ))}
+          </CardContent>
      </Card>
    </div>
   </div>
