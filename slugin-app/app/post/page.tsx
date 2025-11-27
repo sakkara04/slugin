@@ -21,6 +21,7 @@ import { postOpportunity } from "./actions"
 import Navbar from "@/components/ui/navbar"
 import Link from "next/link"
 import UserOpportunitiesClient from '@/components/opportunities/UserOpportunitiesClient'
+import DepartmentsDropDown from "./departmentsDropDown"
 
 export default async function PostPage() {
   const supabase = await createClient()
@@ -132,19 +133,7 @@ export default async function PostPage() {
                 />
               </Field>
               
-              <Field>
-                <FieldLabel htmlFor="categories">Categories/Tags</FieldLabel>
-                <Input
-                  id="categories"
-                  name="categories"
-                  type="text"
-                  placeholder="e.g., Computer Science, Computer Engineering, Biology"
-                  required
-                />
-                <FieldDescription>
-                  Enter categories separated by commas (e.g., comp sci, comp eng, biotech)
-                </FieldDescription>
-              </Field>
+              <DepartmentsDropDown/>
 
               <Field>
                 <FieldLabel htmlFor="file">Flyer/Picture (Optional)</FieldLabel>
