@@ -136,6 +136,20 @@ export default async function PostPage() {
               </Field>
 
               <Field>
+                <FieldLabel htmlFor="link">Application link or contact email *</FieldLabel>
+                <Input
+                  id="link"
+                  name="link"
+                  type="text"
+                  placeholder="Paste an application URL or a contact email (e.g. https://example.com/apply or jane@example.com)"
+                  required
+                />
+                <FieldDescription>
+                  Provide an application URL OR a contact email address. We will accept either; emails will be converted to a mailto: link so applicants can email the contact.
+                </FieldDescription>
+              </Field>
+
+              <Field>
                 <FieldLabel htmlFor="file">Flyer/Picture (Optional)</FieldLabel>
                 <Input
                   id="file"
