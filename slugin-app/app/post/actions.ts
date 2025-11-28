@@ -26,7 +26,7 @@ export async function postOpportunity(formData: FormData) {
   const link = formData.get('link') as string
   const location = formData.get('location') as string
   // Use the categories array for consistency but store as string if the DB expects it (which the insertion logic below assumes).
-  const categoriesArray = formData.get('categories')?.toString().split(',').map(c => c.trim())
+  const categoriesArray = formData.get('tags')?.toString().split(',').map(c => c.trim())
   const categories = categoriesArray ? categoriesArray.join(', ') : null // Convert back to a string for insertion
   const file = formData.get('file') as File | null
   let fileUrl: string | null = null
