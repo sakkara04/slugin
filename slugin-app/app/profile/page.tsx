@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useEffect } from "react";
 import Majors from "./majors";
 import Industries from "./industries";
 import { createClient } from "@/utils/supabase/client";
@@ -37,41 +38,76 @@ export default function ProfilePage() {
   const [year, setYear] = useState("");
   const [industry, setIndustry] = useState("");
 
-  const handleSave = async () => {
-    const missing: string[] = [];
-    if (!firstName.trim()) missing.push("First name");
-    if (!lastName.trim()) missing.push("Last name");
-    if (!pronouns.trim()) missing.push("Pronouns");
-    if (!email.trim()) missing.push("Email");
-    if (!major) missing.push("Major");
-    if (!year) missing.push("Year");
+  
 
-    if (missing.length > 0) {
-      alert("Please fill the required fields: " + missing.join(", "));
-      return;
-    }
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    const saved = {
-      firstName,
-      preferredName,
-      lastName,
-      pronouns,
-      email,
-      bio,
-      major,
-      minor,
-      year,
-      industry,
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching profile:", error.message);
+      } else if (data) {
+        setFirstName(data.first_name || "");
+        setPreferredName(data.preferredName || "");
+        setLastName(data.last_name || "");
+        setPronouns(data.pronouns || "");
+        setEmail(data.email || "");
+        setBio(data.bio || "");
+        setMajor(data.major || "");
+        setMinor(data.minor || "");
+        setYear(data.year || "");
+        setIndustry(data.industry || "");
+      }
     };
 
-    const { error } = await supabase.from("profiles").upsert(saved);
+    fetchProfile();
+  }, []);
 
-    if (error) {
-      alert("Error saving profile: " + error.message);
-    } else {
-      alert("Profile saved successfully!");
-    }
+
+  const handleSave = async () => {
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    alert("You must be logged in to save your profile.");
+    return;
+  }
+
+  const saved = {
+    id: user.id,
+    first_name: firstName,
+    preferredName,
+    last_name: lastName,
+    pronouns,
+    email,
+    bio,
+    major,
+    minor,
+    year,
+    industry,
   };
+
+  const { error } = await supabase.from("profiles").upsert(saved);
+
+  if (error) {
+    alert("Error saving profile: " + error.message);
+  } else {
+    alert("Profile saved successfully!");
+  }
+};
+
 
   return (
     <div>
