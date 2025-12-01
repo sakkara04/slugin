@@ -6,7 +6,7 @@ import { createClient as createBrowserClient } from '@/utils/supabase/client'
 import {
   CardDescription,
 } from "@/components/ui/card";
-import OpportunityCard from '@/components/opportunities/UserOpportunities'
+import OpportunityCard from '@/components/opportunities/OpportunitiesCard'
 // Card UI is rendered by OpportunityCard component
 import { Button } from '@/components/ui/button'
 import { Heart, Check, ExternalLink } from 'lucide-react'
