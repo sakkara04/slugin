@@ -80,9 +80,14 @@ export default function UserOpportunitiesClient({ initial }: { initial: Opportun
               <CardHeader>
                 <CardTitle>
                   {opp.title}
-                  {daysLeft === 2 && (
+                  {daysLeft !== null && daysLeft > 0 && daysLeft <= 2 && (
                     <span className="ml-2 inline-block bg-red-500 text-white text-xs px-2 py-1 rounded">
                       Expiring Soon
+                    </span>
+                    )}
+                  {daysLeft !== null && daysLeft <= 0 && (
+                    <span className="ml-2 inline-block bg-gray-500 text-white text-xs px-2 py-1 rounded">
+                      Expired
                     </span>
                     )}
                   </CardTitle>
