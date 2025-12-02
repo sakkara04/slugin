@@ -121,11 +121,14 @@ export async function postOpportunity(formData: FormData) {
       return { error: 'Failed to save opportunity to database.' }
     }
 
-    // --- 4. Success and Redirect (from 'main' branch logic) ---
-    console.log('Successfully created post!')
-    // Revalidate the /post page (to update the user's list of posts) and redirect
-    revalidatePath('/post')
-    redirect('/opportunities')
+  // --- 4. Success handling ---
+  // Revalidate the /post page so server-rendered lists update, and return a
+  // success marker. We avoid redirecting here so the form action can
+  // complete successfully and the Post page will re-render with the new
+  // opportunity included in `Your Opportunities`.
+  console.log('Successfully created post!')
+  revalidatePath('/post')
+  return { success: true }
 
   } catch (err) {
     console.error('Unexpected error inserting opportunity:', err)

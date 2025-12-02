@@ -32,10 +32,12 @@ type Opportunity = {
   categories?: string;
   link?: string;
   file?: string | null;
+  created_at?: string;
+  deadline?: string;
 };
 
 export default function OpportunitiesPage() {
-  const supabase = createClient()
+  const supabase = createBrowserClient()
 
   const [fetchError, setFetchError] = useState<any>(null);
   const [opportunities, setOpportunities] = useState<any>(null);
@@ -149,27 +151,29 @@ export default function OpportunitiesPage() {
     return () => { mounted = false }
   }, [])
 
-  //This const was created using ChatGPT's help to brainstorm the sorting logic of the opportunities
- const sortedOpportunities = opportunities ? [...opportunities].sort((a, b) => { if (position == "Earliest to Latest Due Date"){
-         return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
-     }
-     else if (position == "Latest to Earliest Due Date"){
-         return new Date(b.deadline).getTime() - new Date(a.deadline).getTime();
-     }
-     else if (position == "Oldest to Newest Post"){
-         return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-     }
-     else {
-         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-     }
- }): [];
+   // Sort the currently-loaded & resolved opportunities (`opps`) according to the selected `position`.
+   const sortedOpportunities = opps
+     ? [...opps].sort((a, b) => {
+         const time = (s?: string) => (s ? new Date(s).getTime() : 0);
+
+         if (position === "Earliest to Latest Due Date") {
+           return time(a.deadline) - time(b.deadline);
+         } else if (position === "Latest to Earliest Due Date") {
+           return time(b.deadline) - time(a.deadline);
+         } else if (position === "Oldest to Newest Post") {
+           return time(a.created_at) - time(b.created_at);
+         } else {
+           return time(b.created_at) - time(a.created_at);
+         }
+       })
+     : [];
 
   // US 3.1 - Task 3: update status based on deadline
  const currentDate = new Date()
- const updatedOpportunities = sortedOpportunities.map(opp => ({
+ const updatedOpportunities = sortedOpportunities.map((opp) => ({
    ...opp,
-   status: new Date(opp.deadline) < currentDate ? 'Archived' : 'Active' //converted string to date
- }))
+   status: opp.deadline ? (new Date(opp.deadline) < currentDate ? "Archived" : "Active") : "Active",
+}));
 
  const activeOpportunities = updatedOpportunities.filter(
    opp => opp.status === 'Active'
@@ -228,7 +232,7 @@ export default function OpportunitiesPage() {
               )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {opps
+                {(showSuggested ? suggestedOpportunities : activeOpportunities)
                   .filter((o) => {
                     if (!filterTag) return true;
                     const cats = (o.categories || "").toLowerCase();
