@@ -106,5 +106,6 @@ export default function OpportunityCard({ opportunity }: Props) {
        <Label>{active ? 'Active' : 'Expired'}</Label>
      </CardContent>
    </Card>
+   {sdalfkjdlskajflkasdjfkl;sajdfkljsdfkljsadklfjsa;l}
  )
 }
