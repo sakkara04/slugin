@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import OpportunityCard from './opportunityCard'
 import { createClient } from '@/utils/supabase/client'
 import Navbar from "@/components/ui/navbar";
+import { useUser } from '@supabase/auth-helpers-react'
 import {
  Card,
  CardContent,
@@ -23,32 +24,54 @@ import React from 'react'
 
 export default function OpportunitiesPage() {
  const supabase = createClient()
+ const user = useUser()
 
  const [fetchError, setFetchError] = useState<any>(null);
  const [opportunities, setOpportunities] = useState<any>(null);
  const [position, setPosition] = React.useState("Newest to Oldest Post")
+ 
+
 
  //suggested opportunities button
  const [showSuggested, setShowSuggested] = useState(false)
+ const [appliedOpportunityIds, setAppliedOpportunityIds] = useState<Set<any>>(new Set())
 
- useEffect(()=> {
-   const fetchOpportunities = async () => {
-     const { data, error } = await supabase.from("opportunities").select(`*, profiles (first_name)`);
+ //get applied opportunity IDs
+useEffect(() => {
+  const fetchAppliedOpportunities = async () => {
+    if (!user) return
 
-     if (error) {
-       console.error('Error fetching data:', error);
-       setFetchError('Error fetching data');
-       setOpportunities(null);
+    const { data, error } = await supabase
+      .from('applications')
+      .select('opportunity_id')
+      .eq('user_id', user.id)
 
-     }
-     if (data) {
-     setOpportunities(data);
-     setFetchError(null);
-     console.log(data)
-     }
-   }
-   fetchOpportunities()
- },[position])
+    if (!error && data) {
+      const appliedIds = new Set(data.map(app => app.opportunity_id))
+      setAppliedOpportunityIds(appliedIds)
+    }
+  }
+
+  fetchAppliedOpportunities()
+}, [user])
+
+useEffect(()=> {
+  const fetchOpportunities = async () => {
+    const { data, error } = await supabase.from("opportunities").select(`*, profiles (first_name)`);
+
+    if (error) {
+      console.error('Error fetching data:', error);
+      setFetchError('Error fetching data');
+      setOpportunities(null);
+    }
+    if (data) {
+      setOpportunities(data);
+      setFetchError(null);
+      console.log(data)
+    }
+  }
+  fetchOpportunities()
+},[position])
 
  //This const was created using ChatGPT's help to brainstorm the sorting logic of the opportunities
  const sortedOpportunities = opportunities ? [...opportunities].sort((a, b) => { if (position == "Earliest to Latest Due Date"){
@@ -76,8 +99,9 @@ export default function OpportunitiesPage() {
    opp => opp.status === 'Active'
  );
 
- const suggestedOpportunities = activeOpportunities.filter((opp) => opp.categories?.toLowerCase().includes("research"));
-
+const suggestedOpportunities = activeOpportunities
+  .filter((opp) => opp.categories?.toLowerCase().includes("research"))
+  .filter((opp) => !appliedOpportunityIds.has(opp.id));
 
  return (
   <div>

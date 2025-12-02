@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useUser } from '@supabase/auth-helpers-react'
 import { Button } from '@/components/ui/button'
+
 import {
  Card,
  CardContent,
@@ -37,6 +38,7 @@ export default function OpportunityCard({ opportunity }: Props) {
  const user = useUser()
  const supabase = createClient()
  const [applied, setApplied] = useState(false)
+
 
  useEffect(() => {
    const checkStatus = async () => {
