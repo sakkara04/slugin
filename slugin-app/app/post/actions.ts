@@ -134,3 +134,16 @@ export async function postOpportunity(formData: FormData) {
     return { error: 'An unexpected server error occurred.' }
   }
 }
+
+// Adapter for form action: the App Router expects a server action that returns
+// void | Promise<void>. Older `postOpportunity` returns an error object on
+// validation failures. This wrapper calls it and converts any error result into
+// a thrown Error so the form action has a void return type.
+export async function postOpportunityAction(formData: FormData): Promise<void> {
+  const result = await postOpportunity(formData)
+  if (result && typeof result === 'object' && 'error' in result && (result as any).error) {
+    // Throw so the action returns Promise<void> and the runtime surfaces the error.
+    throw new Error((result as any).error)
+  }
+  return
+}
