@@ -29,12 +29,32 @@ export default function OpportunitiesPage() {
  const [fetchError, setFetchError] = useState<any>(null);
  const [opportunities, setOpportunities] = useState<any>(null);
  const [position, setPosition] = React.useState("Newest to Oldest Post")
- 
+ const [userProfile, setUserProfile] = useState<any>(null) //store user profile
 
 
  //suggested opportunities button
  const [showSuggested, setShowSuggested] = useState(false)
  const [appliedOpportunityIds, setAppliedOpportunityIds] = useState<Set<any>>(new Set())
+
+//US 1.4.3
+useEffect(() => {
+  const fetchUserProfile = async () => {
+    if (!user) return
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('major, preferred_industry')
+      .eq('user_id', user.id)
+      .single()
+
+    if (!error && data) {
+      setUserProfile(data)
+      console.log('User profile:', data)
+    }
+  }
+
+  fetchUserProfile()
+}, [user])
 
  //get applied opportunity IDs
 useEffect(() => {
@@ -99,9 +119,25 @@ useEffect(()=> {
    opp => opp.status === 'Active'
  );
 
+//updated with major/industry 
 const suggestedOpportunities = activeOpportunities
-  .filter((opp) => opp.categories?.toLowerCase().includes("research"))
-  .filter((opp) => !appliedOpportunityIds.has(opp.id));
+  .filter((opp) => !appliedOpportunityIds.has(opp.id))
+  .filter((opp) => {
+    if (!userProfile) return true;
+
+    const oppCategories = opp.categories?.toLowerCase() || '';
+    
+    const userMajor = userProfile.major?.toLowerCase().replace(/\s*(b\.s\.|b\.a\.|m\.s\.|m\.a\.).*$/i, '').trim() || ''; //for major get rid of B.S or B.A
+    const userIndustry = userProfile.preferred_industry?.toLowerCase() || '';
+
+    const majorWords = userMajor.split(' ').filter((word: string) => word.length > 3);
+    const industryWords = userIndustry.split(' ').filter((word: string) => word.length > 3);
+
+    const matchesMajor = majorWords.some((word: string) => oppCategories.includes(word));
+    const matchesIndustry = industryWords.some((word: string) => oppCategories.includes(word));
+
+    return matchesMajor || matchesIndustry;
+  });
 
  return (
   <div>
