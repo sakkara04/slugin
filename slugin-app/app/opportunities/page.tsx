@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Navbar from "@/components/ui/navbar";
+import { useUser } from '@supabase/auth-helpers-react'
 import { createClient as createBrowserClient } from '@/utils/supabase/client'
 import {
  Card,
@@ -37,11 +38,13 @@ type Opportunity = {
 };
 
 export default function OpportunitiesPage() {
-  const supabase = createBrowserClient()
+ const supabase = createBrowserClient()
+ const user = useUser()
 
-  const [fetchError, setFetchError] = useState<any>(null);
-  const [opportunities, setOpportunities] = useState<any>(null);
-  const [position, setPosition] = React.useState("Newest to Oldest Post")
+ const [fetchError, setFetchError] = useState<any>(null);
+ const [opportunities, setOpportunities] = useState<any>(null);
+ const [position, setPosition] = React.useState("Newest to Oldest Post")
+
 
   //suggested opportunities button
   const [showSuggested, setShowSuggested] = useState(false)
@@ -56,25 +59,44 @@ export default function OpportunitiesPage() {
   );
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
   const [likedMap, setLikedMap] = useState<Record<string, boolean>>({});
+ const [appliedOpportunityIds, setAppliedOpportunityIds] = useState<Set<any>>(new Set())
+
+ //get applied opportunity IDs
+useEffect(() => {
+  const fetchAppliedOpportunities = async () => {
+    if (!user) return
+
+    const { data, error } = await supabase
+      .from('applications')
+      .select('opportunity_id')
+      .eq('user_id', user.id)
+
+    if (!error && data) {
+      const appliedIds = new Set(data.map(app => app.opportunity_id))
+      setAppliedOpportunityIds(appliedIds)
+    }
+  }
+
+  fetchAppliedOpportunities()
+}, [user])
 
    useEffect(()=> {
    const fetchOpportunities = async () => {
      const { data, error } = await supabase.from("opportunities").select(`*, profiles (first_name)`);
 
-     if (error) {
-       console.error('Error fetching data:', error);
-       setFetchError('Error fetching data');
-       setOpportunities(null);
-
-     }
-     if (data) {
-     setOpportunities(data);
-     setFetchError(null);
-     console.log(data)
-     }
-   }
-   fetchOpportunities()
- },[position])
+    if (error) {
+      console.error('Error fetching data:', error);
+      setFetchError('Error fetching data');
+      setOpportunities(null);
+    }
+    if (data) {
+      setOpportunities(data);
+      setFetchError(null);
+      console.log(data)
+    }
+  }
+  fetchOpportunities()
+},[position])
 
   useEffect(() => {
     let mounted = true;
@@ -179,7 +201,9 @@ export default function OpportunitiesPage() {
    opp => opp.status === 'Active'
  );
 
- const suggestedOpportunities = activeOpportunities.filter((opp) => opp.categories?.toLowerCase().includes("research"));
+const suggestedOpportunities = activeOpportunities
+  .filter((opp) => opp.categories?.toLowerCase().includes("research"))
+  .filter((opp) => !appliedOpportunityIds.has(opp.id));
 
   return (
     <div>
