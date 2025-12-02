@@ -284,7 +284,8 @@ export default function OpportunitiesPage() {
 
             {selected.location && (
               <div className="text-sm text-muted-foreground mb-4">
-                Location: {selected.location}
+            <div>Location: {selected.location}</div>
+            <div className="mt-1">Opportunity Closes: {selected.deadline ? new Date(selected.deadline).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : 'No expiry'}</div>
               </div>
             )}
 

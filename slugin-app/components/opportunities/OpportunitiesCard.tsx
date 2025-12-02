@@ -81,7 +81,8 @@ export default function OpportunityCard({
         </p>
         {opp.location && (
           <div className="text-xs text-muted-foreground mt-3">
-            Location: {opp.location}
+            <div>Location: {opp.location}</div>
+            <div className="mt-1">Opportunity Closes: {((opp as any).deadline ? new Date((opp as any).deadline).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : 'No expiry')}</div>
           </div>
         )}
       </div>
