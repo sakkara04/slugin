@@ -1,25 +1,35 @@
-import React from "react";
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "./button";
 import { Lightbulb } from "lucide-react";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/client";
 
-const Navbar: React.FC = () => {
-  // retreving user data if they can post opportunites or not
-  // const supabase = await createClient();
-  // const {
-  //   data: { user },
-  // } = await supabase.auth.getUser();
+export default function Navbar({ canPost: initialCanPost }: { canPost?: boolean }) {
 
-  // let canPost = false;
-  // if (user) {
-  //   const { data: profile } = await supabase
-  //     .from("profiles")
-  //     .select("can_post")
-  //     .eq("id", user.id)
-  //     .single();
-  //   canPost = !!profile?.can_post;
-  // }
+  const supabase = createClient();
+  const [canPost, setCanPost] = useState(initialCanPost ?? false);
+
+  useEffect(() => {
+    // If no prop was passed, fetch from Supabase client-side
+    if (initialCanPost === undefined) {
+      const fetchProfile = async () => {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("can_post")
+            .eq("id", user.id)
+            .single();
+          setCanPost(!!profile?.can_post);
+        }
+      };
+      fetchProfile();
+    }
+  }, [initialCanPost, supabase]);
 
   return (
     <nav
@@ -48,11 +58,11 @@ const Navbar: React.FC = () => {
           <Button variant="ghost">Opportunities</Button>
         </Link>
 
-        {/* {canPost && ( */}
+        {canPost && (
         <Link href="/post" className="nav-link">
           <Button variant="ghost">Post Opportunities</Button>
         </Link>
-        {/* )} */}
+        )}
 
         <Link href="/profile" className="nav-link">
           <Button variant="ghost">Edit / Create Profile</Button>
@@ -67,5 +77,3 @@ const Navbar: React.FC = () => {
     </nav>
   );
 };
-
-export default Navbar;
