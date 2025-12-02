@@ -1,0 +1,40 @@
+name: Daily Notifications
+
+on:
+  # push: # commenting so it doesn't send an email every time I push
+  #   branches:
+  #     - main
+  #     - aashna-emails
+  schedule:
+    # Runs every morning at 8 AM PST (4pm UTC)
+    - cron: '0 16 * * *'
+    # Runs every day at noon (1:30 PM) PST for testing (9:30pm UTC)
+    - cron: '30 21 * * *'
+  # workflow_dispatch:        # allow manual runs too
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      GMAIL_USER: ${{ secrets.GMAIL_USER }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        working-directory: slugin-app
+        run: npm install
+
+      - name: Run notification script
+        working-directory: slugin-app
+        run: node scripts/notify-expiring.js

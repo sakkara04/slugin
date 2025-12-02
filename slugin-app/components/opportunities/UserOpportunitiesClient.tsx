@@ -70,10 +70,27 @@ export default function UserOpportunitiesClient({ initial }: { initial: Opportun
             ? deadlineDate.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
             : '—'
 
+            // Calculate days left
+            const daysLeft = deadlineDate
+              ? Math.ceil((deadlineDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+              : null
+
           return (
             <Card key={opp.id} className="mb-4">
               <CardHeader>
-                <CardTitle>{opp.title}</CardTitle>
+                <CardTitle>
+                  {opp.title}
+                  {daysLeft !== null && daysLeft > 0 && daysLeft <= 2 && (
+                    <span className="ml-2 inline-block bg-red-500 text-white text-xs px-2 py-1 rounded">
+                      Expiring Soon
+                    </span>
+                    )}
+                  {daysLeft !== null && daysLeft <= 0 && (
+                    <span className="ml-2 inline-block bg-gray-500 text-white text-xs px-2 py-1 rounded">
+                      Expired
+                    </span>
+                    )}
+                  </CardTitle>
               </CardHeader>
               <CardContent>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
