@@ -39,6 +39,16 @@ export default async function PostPage() {
     redirect(`/verify-email?email=${encodeURIComponent(user.email || '')}`)
   }
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("can_post")
+    .eq("id", user.id)
+    .single()
+
+  if (!profile?.can_post) {
+    redirect("/home")
+  }
+
   // Fetch opportunities created by the current authenticated user, newest first
   let userOpportunities: any[] = []
   if (user) {

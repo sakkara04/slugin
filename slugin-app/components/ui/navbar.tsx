@@ -2,8 +2,25 @@ import React from "react";
 import Link from "next/link";
 import { Button } from "./button";
 import { Lightbulb } from "lucide-react";
+import { createClient } from "@/utils/supabase/server";
 
 const Navbar: React.FC = () => {
+  // retreving user data if they can post opportunites or not
+  // const supabase = await createClient();
+  // const {
+  //   data: { user },
+  // } = await supabase.auth.getUser();
+
+  // let canPost = false;
+  // if (user) {
+  //   const { data: profile } = await supabase
+  //     .from("profiles")
+  //     .select("can_post")
+  //     .eq("id", user.id)
+  //     .single();
+  //   canPost = !!profile?.can_post;
+  // }
+
   return (
     <nav
       className="navbar"
@@ -31,9 +48,11 @@ const Navbar: React.FC = () => {
           <Button variant="ghost">Opportunities</Button>
         </Link>
 
+        {/* {canPost && ( */}
         <Link href="/post" className="nav-link">
           <Button variant="ghost">Post Opportunities</Button>
         </Link>
+        {/* )} */}
 
         <Link href="/profile" className="nav-link">
           <Button variant="ghost">Edit / Create Profile</Button>
