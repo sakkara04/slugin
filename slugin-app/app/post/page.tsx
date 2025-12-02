@@ -31,7 +31,7 @@ export default async function PostPage() {
 
   // Redirect to signin if no user
   if (!user) {
-    // redirect('/signin')
+    redirect('/signin')
   }
 
   // Redirect to email verification if email is not confirmed

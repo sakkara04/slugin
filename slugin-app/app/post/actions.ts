@@ -101,12 +101,11 @@ export async function postOpportunity(formData: FormData) {
   }
   
   // --- 3. Database Insertion (combining 'christina-US3.3-Task2' and 'main' logic) ---
-
   const row = {
     title,
     description,
     deadline: deadline || null, // Ensure deadline is handled
-  link,
+    link,
     location,
     categories, // This is now a comma-separated string
     file: fileUrl, // The URL from the upload step
