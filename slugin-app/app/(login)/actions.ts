@@ -49,6 +49,17 @@ export async function signup(formData: FormData) {
     redirect('/error')
   }
 
+  if (result.user) {
+    await supabase.from('profiles').insert({
+      id: result.user.id,
+      email: data.email,
+      first_name: formData.get('first_name') as string,
+      last_name: formData.get('last_name') as string,
+      role: 'student',
+    });
+  }
+
+
   // Check if email confirmation is required
   if (result.user && !result.user.email_confirmed_at) {
     revalidatePath('/', 'layout')
