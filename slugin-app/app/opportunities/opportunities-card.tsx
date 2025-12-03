@@ -24,8 +24,17 @@ type Props = {
   user: User | null
 }
 
+type UserProfile = {
+  major?: string;
+  industry?: string;
+}
+
+
 export default function OpportunitiesCard({ user }: Props) {
   const supabase = createClient()
+
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+
 
   const [loading, setLoading] = useState(true);
   const [opps, setOpps] = useState<any>([]);
@@ -45,6 +54,24 @@ export default function OpportunitiesCard({ user }: Props) {
 
   const [appliedOpportunityIds, setAppliedOpportunityIds] = useState<Set<any>>(new Set())
 
+  useEffect(() => {
+  if (!user) return;
+  
+  const fetchUserProfile = async () => {
+    const { data, error } = await supabase
+      .from('profiles') // or whatever your profile table is called
+      .select('major, industry')
+      .eq('id', user.id)
+      .single();
+
+    if (!error && data) {
+      setUserProfile(data);
+    }
+  };
+
+  fetchUserProfile();
+}, [user]);
+  
   useEffect(() => {
     if (!user) return
     const fetchAppliedOpportunities = async () => {
@@ -167,8 +194,45 @@ export default function OpportunitiesCard({ user }: Props) {
   )
 
   const suggestedOpportunities = activeOpportunities
- .filter((opp) => opp.categories?.toLowerCase().includes("research"))
- .filter((opp) => !appliedOpportunityIds.has(opp.id));
+  .filter((opp) => {
+    //first filter: not applied
+    if (appliedOpportunityIds.has(opp.id)) return false;
+
+    //second filter: match major from profile
+    if (userProfile?.major) {
+      const userMajor = userProfile.major.toLowerCase();
+      
+      //handle both array and string formats
+      let tags: string[] = [];
+      
+      if (Array.isArray(opp.categories)) {
+        // If it's already an array, use it directly
+        tags = opp.categories.map((tag: string) => tag.toLowerCase().trim());
+      } else if (typeof opp.categories === 'string') {
+        //if it's a string, parse it (help from chatGPT)
+        try {
+          const parsed = JSON.parse(opp.categories);
+          tags = Array.isArray(parsed) 
+            ? parsed.map((tag: string) => tag.toLowerCase().trim())
+            : opp.categories.toLowerCase().split(',').map((tag: string) => tag.trim());
+        } catch {
+          //if parsing fails, treat it as comma separated string
+          tags = opp.categories.toLowerCase().split(',').map((tag: string) => tag.trim());
+        }
+      }
+      
+      console.log('User Major:', userMajor);
+      console.log('Tags:', tags);
+      
+      const hasMatchingTag = tags.some((tag: string) => tag === userMajor);
+      console.log('Has matching tag?', hasMatchingTag);
+      
+      return hasMatchingTag;
+    }
+
+    //if no profile major, return false
+    return false;
+  });
 
   return (
      <div className="container mx-auto py-8 px-4">
