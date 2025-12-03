@@ -14,10 +14,9 @@ interface NavbarProps {
 export default function Navbar({ user, canPost: initialCanPost }: NavbarProps) {
   const supabase = createClient();
   const [canPost, setCanPost] = useState(initialCanPost ?? false);
-  
-  const first_name = user?.user_metadata?.first_name;
-  const last_name = user?.user_metadata?.last_name;
-  const email = user?.user_metadata?.email;
+  const [firstName, setFirstName] = useState<string | null>(user?.user_metadata?.first_name || null);
+  const [lastName, setLastName] = useState<string | null>(user?.user_metadata?.last_name || null);
+  const [email, setEmail] = useState<string | null>(user?.user_metadata?.email || null);
 
   useEffect(() => {
     // If no prop was passed, fetch from Supabase client-side
@@ -29,15 +28,19 @@ export default function Navbar({ user, canPost: initialCanPost }: NavbarProps) {
         if (user) {
           const { data: profile } = await supabase
             .from("profiles")
-            .select("can_post")
+            .select("can_post, first_name, last_name, email")
             .eq("id", user.id)
             .single();
           setCanPost(!!profile?.can_post);
+          // prefer profile values when available
+          if (profile?.first_name) setFirstName(profile.first_name)
+          if (profile?.last_name) setLastName(profile.last_name)
+          if (profile?.email) setEmail(profile.email)
         }
       };
       fetchProfile();
     }
-  }, [initialCanPost, supabase]);
+  }, [initialCanPost, supabase, user]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-sky-200/50 bg-white/70 backdrop-blur-xl">
@@ -82,15 +85,15 @@ export default function Navbar({ user, canPost: initialCanPost }: NavbarProps) {
           )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="text-sky-700 hover:text-sky-900 hover:bg-sky-100 hover:cursor-pointer">
-                <User /> {first_name}
+                <Button variant="ghost" className="text-sky-700 hover:text-sky-900 hover:bg-sky-100 hover:cursor-pointer">
+                <User /> {firstName ?? 'Profile'}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="bg-white/90 backdrop-blur-lg shadow-lg shadow-sky-600/20 border border-sky-200/50">
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col items-center">
-                  <span className="font-semibold text-sky-700">{first_name} {last_name}</span>
-                  <span className="text-xs text-sky-700">{email}</span>
+                  <span className="font-semibold text-sky-700">{firstName ?? ''} {lastName ?? ''}</span>
+                  <span className="text-xs text-sky-700">{email ?? ''}</span>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-sky-200/50" />

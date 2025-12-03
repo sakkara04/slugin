@@ -24,16 +24,15 @@ export default async function HomePage() {
         redirect(`/verify-email?email=${encodeURIComponent(user.email || '')}`)
     }*/
 
-    const first_name = (user as any)?.user_metadata?.first_name || 'there';
-
-    // fetch profile to see if user can post (faculty)
+    // fetch profile to see if user can post (faculty) and get their first name
     const { data: profile } = await supabase
         .from('profiles')
-        .select('can_post')
+        .select('can_post,first_name')
         .eq('id', user.id)
         .single();
 
     const isFaculty = !!profile?.can_post;
+    const first_name = profile?.first_name || (user as any)?.user_metadata?.first_name || 'there';
 
     // Load user-specific data: saved opportunities + counts of interactions
     const { data: interactions } = await supabase
