@@ -111,9 +111,6 @@ export default function UserOpportunitiesClient({ initial, applicants, saves }: 
                     </span>
                     )}
                   </CardTitle>
-                <div className="text-sm text-muted-foreground mt-1">
-                  Applicants: {applicantsMap[opp.id] || 0} • Saves: {savesMap[opp.id] || 0}
-                </div>
               </CardHeader>
               <CardContent>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
