@@ -33,6 +33,7 @@ type Props = {
   currentFilterTag?: string | null;
   // set the filter to a specific tag (or null to clear)
   onFilterTag?: (tag: string | null) => void;
+  suggestionReason?: string;
 };
 
 export default function OpportunityCard({
@@ -46,6 +47,7 @@ export default function OpportunityCard({
   onToggleLiked,
   onFilterTag,
   currentFilterTag,
+  suggestionReason,
 }: Props) {
   const primaryTag = (opp.categories || "").split(",")[0]?.trim() || null;
   const [copied, setCopied] = useState(false);
@@ -73,6 +75,12 @@ export default function OpportunityCard({
           <h3 className="text-lg font-semibold">{opp.title}</h3>
           {isApplied && <span className="text-sm text-success">Applied</span>}
         </div>
+
+        {suggestionReason && (
+          <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-md mt-2 inline-block">
+            {suggestionReason}
+            </div>
+          )}
 
         <p className="text-sm text-muted-foreground mt-2">
           {opp.description
