@@ -30,6 +30,8 @@ export async function login(formData: FormData) {
 export async function signup(formData: FormData) {
   const supabase = await createClient()
 
+  const canPost = formData.get("can_post") === "true"
+
   const data = {
     email: formData.get('email') as string,
     password: formData.get('password') as string,
@@ -37,7 +39,9 @@ export async function signup(formData: FormData) {
       emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/confirm`,
       data: {
         first_name: formData.get('first_name') as string,
-        last_name: formData.get('last_name') as string
+        last_name: formData.get('last_name') as string,
+        website: formData.get('website') as string,
+        can_post: canPost,
       }
     }
   }
@@ -55,7 +59,7 @@ export async function signup(formData: FormData) {
       email: data.email,
       first_name: formData.get('first_name') as string,
       last_name: formData.get('last_name') as string,
-      role: 'student',
+      can_post: canPost,
     });
   }
 

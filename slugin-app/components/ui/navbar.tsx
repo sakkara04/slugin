@@ -1,12 +1,43 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import { Button } from "./button";
 import { Lightbulb, User, Home, BookOpen, Plus } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from "./dropdown-menu";
+import { createClient } from "@/utils/supabase/client";
 
-const Navbar: React.FC<{ user: any | null }> = ({ user }) => {
-  const first_name = user?.user_metadata?.first_name
-  const last_name = user?.user_metadata?.last_name
-  const email = user?.user_metadata?.email
+interface NavbarProps {
+  user: any | null;
+  canPost?: boolean;
+}
+
+export default function Navbar({ user, canPost: initialCanPost }: NavbarProps) {
+  const supabase = createClient();
+  const [canPost, setCanPost] = useState(initialCanPost ?? false);
+  
+  const first_name = user?.user_metadata?.first_name;
+  const last_name = user?.user_metadata?.last_name;
+  const email = user?.user_metadata?.email;
+
+  useEffect(() => {
+    // If no prop was passed, fetch from Supabase client-side
+    if (initialCanPost === undefined) {
+      const fetchProfile = async () => {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("can_post")
+            .eq("id", user.id)
+            .single();
+          setCanPost(!!profile?.can_post);
+        }
+      };
+      fetchProfile();
+    }
+  }, [initialCanPost, supabase]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-sky-200/50 bg-white/70 backdrop-blur-xl">
@@ -38,16 +69,18 @@ const Navbar: React.FC<{ user: any | null }> = ({ user }) => {
               Opportunities
             </Button>
           </a>
-          <a href="/post">
-            <Button
-              variant="ghost"
-              className="text-sky-700 hover:text-sky-900 hover:bg-sky-100 hover:cursor-pointer"
-            >
-              <Plus />
-              Post
-            </Button>
-          </a>
-          <DropdownMenu >
+          {canPost && (
+            <a href="/post">
+              <Button
+                variant="ghost"
+                className="text-sky-700 hover:text-sky-900 hover:bg-sky-100 hover:cursor-pointer"
+              >
+                <Plus />
+                Post
+              </Button>
+            </a>
+          )}
+          <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="text-sky-700 hover:text-sky-900 hover:bg-sky-100 hover:cursor-pointer">
                 <User /> {first_name}
@@ -67,8 +100,7 @@ const Navbar: React.FC<{ user: any | null }> = ({ user }) => {
               <DropdownMenuSeparator className="bg-sky-200/50" />
               <DropdownMenuItem asChild className="flex justify-center">
                 <form action="/auth/signout" method="post" className="signout-form">
-                  <Button variant="outline" type="submit" className="font-semibold border-sky-200/50 text-sky-700 hover:text-sky-900 hover:bg-sky-100 hover:cursor-pointer
-  ">
+                  <Button variant="outline" type="submit" className="font-semibold border-sky-200/50 text-sky-700 hover:text-sky-900 hover:bg-sky-100 hover:cursor-pointer">
                     Sign out
                   </Button>
                 </form>
@@ -79,6 +111,4 @@ const Navbar: React.FC<{ user: any | null }> = ({ user }) => {
       </nav>
     </header>
   );
-};
-
-export default Navbar;
+}
