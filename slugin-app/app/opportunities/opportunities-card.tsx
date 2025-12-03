@@ -198,7 +198,7 @@ export default function OpportunitiesCard({ user }: Props) {
     //first filter: not applied
     if (appliedOpportunityIds.has(opp.id)) return false;
 
-    //second filter: match major from profile
+    //second filter: match major from profile with opportunity categories/tags
     if (userProfile?.major) {
       const userMajor = userProfile.major.toLowerCase();
       
@@ -206,33 +206,40 @@ export default function OpportunitiesCard({ user }: Props) {
       let tags: string[] = [];
       
       if (Array.isArray(opp.categories)) {
-        // If it's already an array, use it directly
         tags = opp.categories.map((tag: string) => tag.toLowerCase().trim());
       } else if (typeof opp.categories === 'string') {
-        //if it's a string, parse it (help from chatGPT)
         try {
           const parsed = JSON.parse(opp.categories);
           tags = Array.isArray(parsed) 
             ? parsed.map((tag: string) => tag.toLowerCase().trim())
             : opp.categories.toLowerCase().split(',').map((tag: string) => tag.trim());
         } catch {
-          //if parsing fails, treat it as comma separated string
           tags = opp.categories.toLowerCase().split(',').map((tag: string) => tag.trim());
         }
       }
       
-      console.log('User Major:', userMajor);
-      console.log('Tags:', tags);
-      
       const hasMatchingTag = tags.some((tag: string) => tag === userMajor);
-      console.log('Has matching tag?', hasMatchingTag);
       
       return hasMatchingTag;
     }
 
-    //if no profile major, return false
     return false;
-  });
+  })
+  //sort by deadline
+  .sort((a, b) => {
+    const deadlineA = a.deadline ? new Date(a.deadline).getTime() : Infinity;
+    const deadlineB = b.deadline ? new Date(b.deadline).getTime() : Infinity;
+    
+    //opportunities with no deadline go to end
+    return deadlineA - deadlineB;
+  })
+  //add reason to each opportunity
+  .map((opp) => ({
+    ...opp,
+    suggestionReason: `Suggested based on your major: ${userProfile?.major}`
+  }));
+
+
 
   return (
      <div className="container mx-auto py-8 px-4">
@@ -301,6 +308,7 @@ export default function OpportunitiesCard({ user }: Props) {
                        isSaved={Boolean(savedMap[o.id])}
                        isLiked={Boolean(likedMap[o.id])}
                        currentFilterTag={filterTag}
+                       suggestionReason={showSuggested ? o.suggestionReason : undefined}
                        onSelect={(item) => setSelected(item)}
                        onToggleApplied={(id, val) =>
                          setApplied((prev) => ({ ...prev, [id]: val }))
