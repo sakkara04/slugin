@@ -13,11 +13,13 @@ type Opportunity = {
   categories?: string
 }
 
-export default function UserOpportunitiesClient({ initial }: { initial: Opportunity[] }) {
+export default function UserOpportunitiesClient({ initial, applicants, saves }: { initial: Opportunity[], applicants?: Record<string, number>, saves?: Record<string, number> }) {
   const [opps, setOpps] = useState<Opportunity[]>(initial || [])
   const [editing, setEditing] = useState<Opportunity | null>(null)
   const [loading, setLoading] = useState(false)
   const [file, setFile] = useState<File | null>(null)
+  const [applicantsMap, setApplicantsMap] = useState<Record<string, number>>(applicants || {})
+  const [savesMap, setSavesMap] = useState<Record<string, number>>(saves || {})
 
   // form state mirrors the post form
   const [title, setTitle] = useState('')
@@ -124,8 +126,8 @@ export default function UserOpportunitiesClient({ initial }: { initial: Opportun
       )}
 
       {editing && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60 }}>
-          <div style={{ background: 'white', padding: 20, width: '90%', maxWidth: 800, borderRadius: 8 }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', zIndex: 60, padding: 20, overflowY: 'auto' }}>
+          <div style={{ background: 'white', padding: 20, width: '90%', maxWidth: 800, borderRadius: 8, maxHeight: '90vh', overflowY: 'auto' }}>
             <h3 className="text-xl mb-4">Edit Opportunity</h3>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
