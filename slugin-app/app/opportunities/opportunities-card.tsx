@@ -208,7 +208,7 @@ export default function OpportunitiesCard({ user }: Props) {
   const suggestedOpportunities = activeOpportunities
   .filter((opp: any) => {
     //first filter: not applied
-    if (appliedOpportunityIds.has(opp.id)) return false;
+    if (applied[opp.id]) return false;
 
     //second filter: match major from profile with opportunity categories/tags
     if (userProfile?.major) {
@@ -467,6 +467,13 @@ export default function OpportunitiesCard({ user }: Props) {
                  </button>
                </div>
              )}
+
+             {showSuggested && suggestedOpportunities.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-lg text-muted-foreground">No new suggested opportunities</p>
+                <p className="text-sm text-muted-foreground mt-2">Check back later or browse all opportunities</p>
+                </div>
+              )}
 
              {/* Active Filter Summary */}
              {(appliedIndustries.length > 0 || appliedMajors.length > 0 || appliedSearchKeyword) && (
