@@ -5,10 +5,6 @@ import Navbar from "@/components/ui/navbar";
 import { useUser } from '@supabase/auth-helpers-react'
 import { createClient as createBrowserClient } from '@/utils/supabase/client'
 import {
- Card,
- CardContent,
- CardHeader,
- CardTitle,
  CardDescription,
 } from "@/components/ui/card";
 import {
@@ -19,10 +15,11 @@ import {
  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import OpportunityCard from '@/components/opportunities/OpportunitiesCard'
-// Card UI is rendered by OpportunityCard component
 import { Button } from "@/components/ui/button";
-import { Heart, Check, ExternalLink } from "lucide-react";
+import { Heart, Check, ExternalLink, Filter, X } from "lucide-react";
 import { upsertUserInteraction } from "@/utils/supabase/interactions";
+import industries from "../profile/industries";
+import majors from "../profile/majors";
 
 type Opportunity = {
   id: string;
@@ -35,6 +32,7 @@ type Opportunity = {
   file?: string | null;
   created_at?: string;
   deadline?: string;
+  status?: string;
 };
 
 export default function OpportunitiesPage() {
@@ -60,6 +58,17 @@ export default function OpportunitiesPage() {
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
   const [likedMap, setLikedMap] = useState<Record<string, boolean>>({});
  const [appliedOpportunityIds, setAppliedOpportunityIds] = useState<Set<any>>(new Set())
+
+ // Filter State
+ const [showFilterMenu, setShowFilterMenu] = useState(false);
+ const [tempSelectedIndustries, setTempSelectedIndustries] = useState<string[]>([]);
+ const [tempSelectedMajors, setTempSelectedMajors] = useState<string[]>([]);
+ const [tempSearchKeyword, setTempSearchKeyword] = useState<string>(""); // New Temp Keyword State
+ 
+ const [appliedIndustries, setAppliedIndustries] = useState<string[]>([]);
+ const [appliedMajors, setAppliedMajors] = useState<string[]>([]);
+ const [appliedSearchKeyword, setAppliedSearchKeyword] = useState<string>(""); // New Applied Keyword State
+
 
  //get applied opportunity IDs
 useEffect(() => {
@@ -114,9 +123,6 @@ useEffect(() => {
         }
 
         if (mounted && data) {
-          // Resolve stored file paths to usable URLs. If the `file` field is
-          // already an absolute URL (starts with http) we keep it. Otherwise
-          // try to get a public URL from the `flyers` storage bucket.
           const resolved = await Promise.all(
             (data as Opportunity[]).map(async (row) => {
               const copy = { ...row };
@@ -173,7 +179,6 @@ useEffect(() => {
     return () => { mounted = false }
   }, [])
 
-   // Sort the currently-loaded & resolved opportunities (`opps`) according to the selected `position`.
    const sortedOpportunities = opps
      ? [...opps].sort((a, b) => {
          const time = (s?: string) => (s ? new Date(s).getTime() : 0);
@@ -190,7 +195,6 @@ useEffect(() => {
        })
      : [];
 
-  // US 3.1 - Task 3: update status based on deadline
  const currentDate = new Date()
  const updatedOpportunities = sortedOpportunities.map((opp) => ({
    ...opp,
@@ -205,29 +209,182 @@ const suggestedOpportunities = activeOpportunities
   .filter((opp) => opp.categories?.toLowerCase().includes("research"))
   .filter((opp) => !appliedOpportunityIds.has(opp.id));
 
+
+// Filter Logic
+const normalizeMajor = (text: string) => {
+  return text.replace(/\bB\.?[SA]\.?\b/gi, "").trim().toLowerCase();
+};
+
+const matchesCustomFilters = (opp: Opportunity) => {
+    // 1. Keyword Filter (Search)
+    if (appliedSearchKeyword) {
+        const keyword = appliedSearchKeyword.toLowerCase();
+        const titleMatch = (opp.title || "").toLowerCase().includes(keyword);
+        const descMatch = (opp.description || "").toLowerCase().includes(keyword);
+        const fullDescMatch = (opp.fullDescription || "").toLowerCase().includes(keyword);
+        
+        if (!titleMatch && !descMatch && !fullDescMatch) {
+            return false;
+        }
+    }
+
+    // 2. Category Filters (Union)
+    if (appliedIndustries.length === 0 && appliedMajors.length === 0) return true;
+    
+    const cats = (opp.categories || "");
+    const catsLower = cats.toLowerCase();
+    
+    const industryMatch = appliedIndustries.some(ind => 
+        catsLower.includes(ind.toLowerCase())
+    );
+    
+    const majorMatch = appliedMajors.some(maj => {
+        const normFilter = normalizeMajor(maj);
+        const normCats = normalizeMajor(cats);
+        return normCats.includes(normFilter);
+    });
+    
+    return industryMatch || majorMatch;
+};
+
+
   return (
     <div>
       <Navbar />
-      <div className="container mx-auto py-8 px-4">
-        {/* Opportunities Page Header */}
+      <div className="container mx-auto py-8 px-4 relative">
         <div className="max-w-6xl mx-auto">
           <header className="mb-6">
-          <div className = "flex justify-between">
+          <div className = "flex flex-col md:flex-row justify-between gap-4 md:items-center">
             <h1 className="text-2xl font-semibold">Available Opportunities</h1>
-         <DropdownMenu>
-             <DropdownMenuTrigger asChild><Button>Sort By:  {position} ↓</Button></DropdownMenuTrigger>
-             <DropdownMenuContent>
-               <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
-               <DropdownMenuRadioItem value={"Newest to Oldest Post"}>Newest to Oldest Post</DropdownMenuRadioItem>
-               <DropdownMenuRadioItem value={"Oldest to Newest Post"}>Oldest to Newest Post</DropdownMenuRadioItem>
-               <DropdownMenuRadioItem value={"Earliest to Latest Due Date"}>Earliest to Latest Due Date</DropdownMenuRadioItem>
-               <DropdownMenuRadioItem value={"Latest to Earliest Due Date"}>Latest to Earliest Due Date</DropdownMenuRadioItem>
-             </DropdownMenuRadioGroup>
-             </DropdownMenuContent>
-           </DropdownMenu>
+            
+            <div className="flex gap-2">
+                <Button 
+                    variant="outline" 
+                    className="flex gap-2"
+                    onClick={() => setShowFilterMenu(!showFilterMenu)}
+                >
+                    <Filter size={16} /> Filter
+                </Button>
+
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild><Button>Sort By:  {position} ↓</Button></DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                    <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
+                    <DropdownMenuRadioItem value={"Newest to Oldest Post"}>Newest to Oldest Post</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value={"Oldest to Newest Post"}>Oldest to Newest Post</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value={"Earliest to Latest Due Date"}>Earliest to Latest Due Date</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value={"Latest to Earliest Due Date"}>Latest to Earliest Due Date</DropdownMenuRadioItem>
+                    </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
          </div>
-            <CardDescription>Browse and mark opportunities you’ve applied to</CardDescription>
-            {/* Add the suggested opportunities toggle button here */}
+         
+         {showFilterMenu && (
+             <div className="mt-4 p-4 border rounded-lg shadow-sm bg-white relative">
+                 <button 
+                    onClick={() => setShowFilterMenu(false)}
+                    className="absolute top-2 right-2 p-1 hover:bg-gray-100 rounded-full"
+                 >
+                     <X size={20} className="text-gray-500" />
+                 </button>
+
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pr-8">
+                     {/* Keywords Input */}
+                     <div className="lg:col-span-1">
+                        <label className="block text-sm font-medium mb-1">Keywords</label>
+                        <input
+                            type="text"
+                            placeholder="Search title or description..."
+                            className="w-full p-2 border rounded-md text-sm"
+                            value={tempSearchKeyword}
+                            onChange={(e) => setTempSearchKeyword(e.target.value)}
+                        />
+                     </div>
+
+                     <div className="lg:col-span-1">
+                         <label className="block text-sm font-medium mb-1">Industry</label>
+                         <select 
+                             className="w-full p-2 border rounded-md text-sm"
+                             value=""
+                             onChange={(e) => {
+                                 if (e.target.value) {
+                                     setTempSelectedIndustries([...tempSelectedIndustries, e.target.value]);
+                                 }
+                             }}
+                         >
+                             <option value="">Select Industry...</option>
+                             {industries
+                                .filter(i => !tempSelectedIndustries.includes(i))
+                                .map(i => (
+                                 <option key={i} value={i}>{i}</option>
+                             ))}
+                         </select>
+                         <div className="flex flex-wrap gap-2 mt-2">
+                             {tempSelectedIndustries.map(ind => (
+                                 <span key={ind} className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-2.5 py-0.5 rounded-full text-xs font-semibold flex items-center gap-1 transition-colors">
+                                     {ind}
+                                     <button 
+                                        onClick={() => setTempSelectedIndustries(tempSelectedIndustries.filter(t => t !== ind))}
+                                        className="hover:text-red-500"
+                                     >
+                                        <X size={12} />
+                                     </button>
+                                 </span>
+                             ))}
+                         </div>
+                     </div>
+
+                     <div className="lg:col-span-1">
+                         <label className="block text-sm font-medium mb-1">Major</label>
+                         <select 
+                             className="w-full p-2 border rounded-md text-sm"
+                             value=""
+                             onChange={(e) => {
+                                 if (e.target.value) {
+                                     setTempSelectedMajors([...tempSelectedMajors, e.target.value]);
+                                 }
+                             }}
+                         >
+                             <option value="">Select Major...</option>
+                             {majors
+                                .filter(m => !tempSelectedMajors.includes(m))
+                                .map(m => (
+                                 <option key={m} value={m}>{m}</option>
+                             ))}
+                         </select>
+                         <div className="flex flex-wrap gap-2 mt-2">
+                             {tempSelectedMajors.map(maj => (
+                                 <span key={maj} className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-2.5 py-0.5 rounded-full text-xs font-semibold flex items-center gap-1 transition-colors">
+                                     {maj}
+                                     <button 
+                                        onClick={() => setTempSelectedMajors(tempSelectedMajors.filter(t => t !== maj))}
+                                        className="hover:text-red-500"
+                                     >
+                                        <X size={12} />
+                                     </button>
+                                 </span>
+                             ))}
+                         </div>
+                     </div>
+                 </div>
+
+                 <div className="mt-4 flex justify-end">
+                     <Button 
+                        onClick={() => {
+                            setAppliedIndustries(tempSelectedIndustries);
+                            setAppliedMajors(tempSelectedMajors);
+                            setAppliedSearchKeyword(tempSearchKeyword);
+                        }}
+                     >
+                        Filter Results
+                     </Button>
+                 </div>
+             </div>
+         )}
+
+
+            <CardDescription className="mt-2">Browse and mark opportunities you’ve applied to</CardDescription>
          <div className="mt-4">
            <Button 
              onClick={() => setShowSuggested(!showSuggested)}
@@ -238,7 +395,6 @@ const suggestedOpportunities = activeOpportunities
          </div>
           </header>
 
-          {/* Showing Similar Events Based on Tags */}
           {loading ? (
             <div>Loading...</div>
           ) : (
@@ -254,13 +410,42 @@ const suggestedOpportunities = activeOpportunities
                   </button>
                 </div>
               )}
+              
+              {(appliedIndustries.length > 0 || appliedMajors.length > 0 || appliedSearchKeyword) && (
+                   <div className="mb-4 text-sm flex gap-2 items-center flex-wrap">
+                       <span>Active Filters:</span>
+                       {appliedSearchKeyword && (
+                           <span className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full border border-blue-200">
+                               Keyword: {appliedSearchKeyword}
+                           </span>
+                       )}
+                       {[...appliedIndustries, ...appliedMajors].map((f, idx) => (
+                           <span key={idx} className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">{f}</span>
+                       ))}
+                       <button 
+                            className="underline text-xs ml-2"
+                            onClick={() => {
+                                setAppliedIndustries([]);
+                                setAppliedMajors([]);
+                                setAppliedSearchKeyword("");
+                                setTempSelectedIndustries([]);
+                                setTempSelectedMajors([]);
+                                setTempSearchKeyword("");
+                            }}
+                       >
+                           Clear all
+                       </button>
+                   </div>
+              )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {(showSuggested ? suggestedOpportunities : activeOpportunities)
                   .filter((o) => {
-                    if (!filterTag) return true;
-                    const cats = (o.categories || "").toLowerCase();
-                    return cats.includes(filterTag.toLowerCase());
+                    if (filterTag) {
+                        const cats = (o.categories || "").toLowerCase();
+                        if (!cats.includes(filterTag.toLowerCase())) return false;
+                    }
+                    return matchesCustomFilters(o);
                   })
                   .map((o) => {
                     const isApplied = Boolean(applied[o.id]);
@@ -369,7 +554,6 @@ const suggestedOpportunities = activeOpportunities
             <div className="flex items-center gap-4 mb-4">
               {selected.link && (
                 <div>
-                  {/* Application Link or Email Button */}
                   <Button
                     size="sm"
                     onClick={(e) => {
@@ -403,7 +587,6 @@ const suggestedOpportunities = activeOpportunities
                   )}
                 </div>
               )}
-              {/* Applied button logic */}
               <Button
                 variant={applied[selected.id] ? "secondary" : "outline"}
                 onClick={async () => {
@@ -422,7 +605,6 @@ const suggestedOpportunities = activeOpportunities
                         "applied"
                       );
                     } else {
-                      // remove interaction when unmarking
                       const { error } = await supabase
                         .from("user_interactions")
                         .delete()
@@ -432,7 +614,6 @@ const suggestedOpportunities = activeOpportunities
                         });
                       if (error) throw error;
                     }
-                    // ensure saved state cleared when applying/unapplying
                     setSavedMap((prev) => ({ ...prev, [selected.id]: false }));
                     setLikedMap((prev) => ({ ...prev, [selected.id]: false }));
                   } catch (err) {
@@ -440,7 +621,6 @@ const suggestedOpportunities = activeOpportunities
                       "Failed to update applied interaction from modal",
                       err
                     );
-                    // revert optimistic update on error
                     setApplied((prev) => ({ ...prev, [selected.id]: !next }));
                   }
                 }}
@@ -453,7 +633,6 @@ const suggestedOpportunities = activeOpportunities
                 </span>
               </Button>
             </div>
-            {/* Show more like this button logic */}
             <div className="mt-2">
               <button
                 className="flex items-center gap-2 text-sm text-muted-foreground"
@@ -471,7 +650,6 @@ const suggestedOpportunities = activeOpportunities
                     } = await supabase.auth.getUser();
                     if (!user) return;
                     await upsertUserInteraction(user.id, selected.id, "liked");
-                    // clear other actions in UI when liked and mark liked
                     setSavedMap((prev) => ({ ...prev, [selected.id]: false }));
                     setApplied((prev) => ({ ...prev, [selected.id]: false }));
                     setLikedMap((prev) => ({ ...prev, [selected.id]: true }));
