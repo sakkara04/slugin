@@ -1,17 +1,11 @@
 'use client'
 
 // all opportunities card
-// TO-DO:
-// --> update ui (three column display)
 
 import { User } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/button'
-import OpportunityCard from './opportunity-card'
+import OpportunityCard from '@/components/opportunities/OpportunitiesCard';
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
   CardDescription,
 } from "@/components/ui/card";
 import {
@@ -21,9 +15,10 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Heart, Check, ExternalLink } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { createClient } from '@/utils/supabase/client'
-import React from 'react'
+import { createClient} from '@/utils/supabase/client'
+import upsertUserInteraction from '@/utils/supabase/interactions';
 
 type Props = {
   user: User | null
@@ -32,42 +27,131 @@ type Props = {
 export default function OpportunitiesCard({ user }: Props) {
   const supabase = createClient()
 
-  const [fetchError, setFetchError] = useState<any>(null);
-  const [opportunities, setOpportunities] = useState<any>(null);
-  const [position, setPosition] = React.useState("Newest to Oldest Post")
+  const [loading, setLoading] = useState(true);
+  const [opps, setOpps] = useState<any>([]);
+  const [position, setPosition] = useState("Newest to Oldest Post")
+  const [selected, setSelected] = useState<any>(null);
+
+  const [applied, setApplied] = useState<Record<string, boolean>>({});
+  const [savedMap, setSavedMap] = useState<Record<string, boolean>>({});
+  const [likedMap, setLikedMap] = useState<Record<string, boolean>>({});
+  const [filterTag, setFilterTag] = useState<string | null>(null);
+
+  const [showSuggested, setShowSuggested] = useState(false)
+  const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
+  const [triedSignedFor, setTriedSignedFor] = useState<Record<string, boolean>>(
+    {}
+  );
+
+  const [appliedOpportunityIds, setAppliedOpportunityIds] = useState<Set<any>>(new Set())
 
   useEffect(() => {
-    const fetchOpportunities = async () => {
-      const { data, error } = await supabase.from("opportunities").select(`*, profiles (first_name)`);
+    if (!user) return
+    const fetchAppliedOpportunities = async () => {
+    const { data, error } = await supabase
+      .from('applications')
+      .select('opportunity_id')
+      .eq('user_id', user.id)
 
-      if (error) {
-        console.error('Error fetching data:', error);
-        setFetchError('Error fetching data');
-        setOpportunities(null);
-
-      }
-      if (data) {
-        setOpportunities(data);
-        setFetchError(null);
-        console.log(data)
-      }
+    if (!error && data) {
+      const appliedIds = new Set(data.map(app => app.opportunity_id))
+      setAppliedOpportunityIds(appliedIds)
     }
-    fetchOpportunities()
-  }, [position])
+ }
+
+ fetchAppliedOpportunities()
+}, [user])
+
+   useEffect(() => {
+   let mounted = true;
+   async function load() {
+     try {
+       const supabase = createClient();
+       const { data, error } = await supabase
+         .from("opportunities")
+         .select("*")
+         .order("created_at", { ascending: false });
+
+       if (error) {
+         console.error("Error loading opportunities", error);
+         return;
+       }
+
+       if (mounted && data) {
+         // Resolve stored file paths to usable URLs. If the `file` field is
+         // already an absolute URL (starts with http) we keep it. Otherwise
+         // try to get a public URL from the `flyers` storage bucket.
+         const resolved = await Promise.all(
+           (data).map(async (row) => {
+             const copy = { ...row };
+             if (copy.file && !copy.file.startsWith("http")) {
+               try {
+                 const { data: publicData } = supabase.storage
+                   .from("flyers")
+                   .getPublicUrl(copy.file);
+                 if (publicData?.publicUrl) {
+                   copy.file = publicData.publicUrl;
+                 }
+               } catch (err) {
+                 console.error("Error resolving file URL for", copy.file, err);
+               }
+             }
+             return copy;
+           })
+         );
+
+         setOpps(resolved);
+         try {
+           const { data: userData } = await supabase.auth.getUser();
+           const user = userData?.user;
+           if (user) {
+             const { data: interactions } = await supabase
+               .from("user_interactions")
+               .select("opportunity_id,action")
+               .eq("user_id", user.id);
+
+             const appliedInit: Record<string, boolean> = {};
+             const savedInit: Record<string, boolean> = {};
+             const likedInit: Record<string, boolean> = {};
+             const list = (interactions as any[]) || [];
+             list.forEach((r: any) => {
+               const id = String(r.opportunity_id);
+               if (r.action === "applied") appliedInit[id] = true;
+               if (r.action === "saved") savedInit[id] = true;
+               if (r.action === "liked") likedInit[id] = true;
+             });
+             setApplied(appliedInit);
+             setSavedMap(savedInit);
+             setLikedMap(likedInit);
+           }
+         } catch (err) {
+           console.error("Failed to load user interactions", err);
+         }
+       }
+     } finally {
+       if (mounted) setLoading(false);
+     }
+   }
+
+   load()
+   return () => { mounted = false }
+ }, [])
 
   //This const was created using ChatGPT's help to brainstorm the sorting logic of the opportunities
-  const sortedOpportunities = opportunities ? [...opportunities].sort((a, b) => {
+  const sortedOpportunities = opps ? [...opps].sort((a, b) => {
+    const time = (s?: string) => (s ? new Date(s).getTime(): 0);
+
     if (position == "Earliest to Latest Due Date") {
-      return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+      return time(a.deadline)- time(b.deadline);
     }
     else if (position == "Latest to Earliest Due Date") {
-      return new Date(b.deadline).getTime() - new Date(a.deadline).getTime();
+      return time(b.deadline) - time(a.deadline);
     }
     else if (position == "Oldest to Newest Post") {
-      return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      return time(a.created_at) - time(b.created_at);
     }
     else {
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      return time(b.created_at) - time(a.created_at);
     }
   }) : [];
 
@@ -75,41 +159,300 @@ export default function OpportunitiesCard({ user }: Props) {
   const currentDate = new Date()
   const updatedOpportunities = sortedOpportunities.map(opp => ({
     ...opp,
-    status: new Date(opp.deadline) < currentDate ? 'Archived' : 'Active' //converted string to date
+    status: opp.deadline ? (new Date(opp.deadline) < currentDate ? 'Archived' : 'Active') : "Active" //converted string to date
   }))
 
   const activeOpportunities = updatedOpportunities.filter(
     opp => opp.status === 'Active'
   )
 
+  const suggestedOpportunities = activeOpportunities
+ .filter((opp) => opp.categories?.toLowerCase().includes("research"))
+ .filter((opp) => !appliedOpportunityIds.has(opp.id));
+
   return (
-    <div className="container mx-auto py-8 px-4 max-w-2xl">
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between">
-            <CardTitle className="text-2xl">Available Opportunities</CardTitle>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild><Button>Sort By:  {position} ↓</Button></DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
-                  <DropdownMenuRadioItem value={"Newest to Oldest Post"}>Newest to Oldest Post</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value={"Oldest to Newest Post"}>Oldest to Newest Post</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value={"Earliest to Latest Due Date"}>Earliest to Latest Due Date</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value={"Latest to Earliest Due Date"}>Latest to Earliest Due Date</DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          <CardDescription>
-            Browse and mark opportunities you've applied to
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {activeOpportunities && activeOpportunities.map((opportunity) => (
-            <OpportunityCard key={opportunity.id} opportunity={opportunity} user={user} />
-          ))}
-        </CardContent>
-      </Card>
-    </div>
-  );
+     <div className="container mx-auto py-8 px-4">
+       {/* Opportunities Page Header */}
+       <div className="max-w-6xl mx-auto">
+         <header className="mb-6">
+         <div className = "flex justify-between">
+           <h1 className="text-2xl font-semibold">Available Opportunities</h1>
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild><Button>Sort By:  {position} ↓</Button></DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
+              <DropdownMenuRadioItem value={"Newest to Oldest Post"}>Newest to Oldest Post</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value={"Oldest to Newest Post"}>Oldest to Newest Post</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value={"Earliest to Latest Due Date"}>Earliest to Latest Due Date</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value={"Latest to Earliest Due Date"}>Latest to Earliest Due Date</DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+           <CardDescription>Browse and mark opportunities you've applied to</CardDescription>
+           {/* Add the suggested opportunities toggle button here */}
+        <div className="mt-4">
+          <Button
+            onClick={() => setShowSuggested(!showSuggested)}
+            variant={showSuggested ? "default" : "outline"}
+          >
+            {showSuggested ? "Show All Opportunities" : "Show Suggested Opportunities"}
+          </Button>
+        </div>
+         </header>
+
+         {/* Showing Similar Events Based on Tags */}
+         {loading ? (
+           <div>Loading...</div>
+         ) : (
+           <div>
+             {filterTag && (
+               <div className="mb-4 text-sm">
+                 Showing events like "{filterTag}" —{" "}
+                 <button
+                   className="underline"
+                   onClick={() => setFilterTag(null)}
+                 >
+                   Clear filter
+                 </button>
+               </div>
+             )}
+
+             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
+               {(showSuggested ? suggestedOpportunities : activeOpportunities)
+                 .filter((o) => {
+                   if (!filterTag) return true;
+                   const cats = (o.categories || "").toLowerCase();
+                   return cats.includes(filterTag.toLowerCase());
+                 })
+                 .map((o) => {
+                   const isApplied = Boolean(applied[o.id]);
+
+                   return (
+                     <OpportunityCard
+                       key={o.id}
+                       user={user}
+                       opp={o}
+                       isApplied={isApplied}
+                       isSaved={Boolean(savedMap[o.id])}
+                       isLiked={Boolean(likedMap[o.id])}
+                       currentFilterTag={filterTag}
+                       onSelect={(item) => setSelected(item)}
+                       onToggleApplied={(id, val) =>
+                         setApplied((prev) => ({ ...prev, [id]: val }))
+                       }
+                       onToggleSaved={(id, val) =>
+                         setSavedMap((prev) => ({ ...prev, [id]: val }))
+                       }
+                       onToggleLiked={(id, val) =>
+                         setLikedMap((prev) => ({ ...prev, [id]: val }))
+                       }
+                       onFilterTag={(tag) => setFilterTag(tag)}
+                     />
+                   );
+                 })}
+             </div>
+           </div>
+         )}
+       </div>
+     {/* Opportunity Details Modal */}
+     {selected && (
+       <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+         <div className="bg-white w-[95%] max-w-3xl rounded-lg p-6 shadow-lg overflow-auto max-h-[90vh]">
+           <div className="flex justify-between items-center mb-2">
+             <h2 className="text-2xl font-semibold">{selected.title}</h2>
+             <button
+               className="text-sm text-muted-foreground"
+               onClick={() => setSelected(null)}
+             >
+               Close
+             </button>
+           </div>
+
+           {selected.location && (
+             <div className="text-sm text-muted-foreground mb-4">
+           <div>Location: {selected.location}</div>
+           <div className="mt-1">Opportunity Closes: {selected.deadline ? new Date(selected.deadline).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : 'No expiry'}</div>
+             </div>
+           )}
+
+           <div className="w-full flex justify-center mb-6">
+             {selected.file ? (
+               <img
+                 src={selected.file}
+                 alt={selected.title}
+                 className="w-full max-w-lg h-auto object-contain rounded bg-gray-50"
+                 onError={async () => {
+                   if (!selected) return;
+                   if (triedSignedFor[selected.id]) return;
+                   try {
+                     const url = selected.file || "";
+                     const m = url.match(/\/flyers\/(.*)$/);
+                     const path = m ? decodeURIComponent(m[1]) : null;
+                     if (!path) return;
+                     setTriedSignedFor((prev) => ({
+                       ...prev,
+                       [selected.id]: true,
+                     }));
+                     const res = await fetch("/api/storage/signed-url", {
+                       method: "POST",
+                       headers: { "Content-Type": "application/json" },
+                       body: JSON.stringify({ path }),
+                     });
+                     const json = await res.json();
+                     if (json?.success && json.signedUrl) {
+                       setSelected({ ...selected, file: json.signedUrl });
+                     }
+                   } catch (err) {
+                     console.error(
+                       "Error attempting signed-url fallback",
+                       err
+                     );
+                   }
+                 }}
+               />
+             ) : (
+               <div className="w-full max-w-lg bg-gray-50 rounded-md p-8 text-center text-muted-foreground">
+                 No preview available
+               </div>
+             )}
+           </div>
+
+           <div className="flex items-start gap-4 mb-6">
+             <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-sm text-muted-foreground">
+               CS
+             </div>
+             <p className="text-base">
+               {selected.fullDescription ||
+                 selected.description ||
+                 "No additional details provided."}
+             </p>
+           </div>
+
+           <div className="flex items-center gap-4 mb-4">
+             {selected.link && (
+               <div>
+                 {/* Application Link or Email Button */}
+                 <Button
+                   size="sm"
+                   onClick={(e) => {
+                     e.stopPropagation();
+                     const url = selected.link || "";
+                     if (url.startsWith("mailto:")) {
+                       const email = url.replace(/^mailto:/, "");
+                       try {
+                         navigator.clipboard.writeText(email);
+                         setCopiedEmail(email);
+                         setTimeout(() => setCopiedEmail(null), 2000);
+                       } catch (err) {
+                         console.error("Clipboard write failed", err);
+                       }
+                     } else {
+                       window.open(url, "_blank", "noopener,noreferrer");
+                     }
+                   }}
+                 >
+                   <ExternalLink size={14} />
+                   <span className="ml-2">
+                     {(selected.link || "").startsWith("mailto:")
+                       ? "Copy email"
+                       : "Open application"}
+                   </span>
+                 </Button>
+                 {copiedEmail && (
+                   <div className="text-sm text-success mt-2">
+                     Email copied to clipboard!
+                   </div>
+                 )}
+               </div>
+             )}
+             {/* Applied button logic */}
+             <Button
+               variant={applied[selected.id] ? "secondary" : "outline"}
+               onClick={async () => {
+                 const next = !applied[selected.id];
+                 setApplied((prev) => ({ ...prev, [selected.id]: next }));
+                 try {
+                   const supabase = createClient();
+                   const {
+                     data: { user },
+                   } = await supabase.auth.getUser();
+                   if (!user) return;
+                   if (next) {
+                     await upsertUserInteraction(
+                       user.id,
+                       selected.id,
+                       "applied"
+                     );
+                   } else {
+                     // remove interaction when unmarking
+                     const { error } = await supabase
+                       .from("user_interactions")
+                       .delete()
+                       .match({
+                         user_id: user.id,
+                         opportunity_id: Number(selected.id),
+                       });
+                     if (error) throw error;
+                   }
+                   // ensure saved state cleared when applying/unapplying
+                   setSavedMap((prev) => ({ ...prev, [selected.id]: false }));
+                   setLikedMap((prev) => ({ ...prev, [selected.id]: false }));
+                 } catch (err) {
+                   console.error(
+                     "Failed to update applied interaction from modal",
+                     err
+                   );
+                   // revert optimistic update on error
+                   setApplied((prev) => ({ ...prev, [selected.id]: !next }));
+                 }
+               }}
+             >
+               <Check size={14} />
+               <span className="ml-2">
+                 {applied[selected.id]
+                   ? "Unmark as applied"
+                   : "Mark as applied"}
+               </span>
+             </Button>
+           </div>
+           {/* Show more like this button logic */}
+           <div className="mt-2">
+             <button
+               className="flex items-center gap-2 text-sm text-muted-foreground"
+               onClick={async () => {
+                 const primaryTag =
+                   (selected.categories || "").split(",")[0]?.trim() || null;
+                 setFilterTag((prev) =>
+                   prev === primaryTag ? null : primaryTag
+                 );
+                 setSelected(null);
+                 try {
+                   const supabase = createClient();
+                   const {
+                     data: { user },
+                   } = await supabase.auth.getUser();
+                   if (!user) return;
+                   await upsertUserInteraction(user.id, selected.id, "liked");
+                   // clear other actions in UI when liked and mark liked
+                   setSavedMap((prev) => ({ ...prev, [selected.id]: false }));
+                   setApplied((prev) => ({ ...prev, [selected.id]: false }));
+                   setLikedMap((prev) => ({ ...prev, [selected.id]: true }));
+                 } catch (err) {
+                   console.error(
+                     "Failed to upsert liked interaction from modal",
+                     err
+                   );
+                 }
+               }}
+             >
+               <Heart size={16} />
+               <span>Show more like this</span>
+             </button>
+           </div>
+         </div>
+       </div>
+     )}
+   </div>
+);
 }

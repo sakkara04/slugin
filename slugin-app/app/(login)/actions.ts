@@ -59,7 +59,6 @@ export async function signup(formData: FormData) {
     });
   }
 
-
   // Check if email confirmation is required
   if (result.user && !result.user.email_confirmed_at) {
     revalidatePath('/', 'layout')

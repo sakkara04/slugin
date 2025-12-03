@@ -69,43 +69,22 @@ export async function postOpportunity(formData: FormData) {
     }
   }
 
-  // Normalize the link: if it's an email, convert to mailto:, otherwise ensure
-  // it's a valid URL (add https:// if the user omitted scheme).
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (emailRegex.test(rawLink)) {
-    link = `mailto:${rawLink}`
-  } else {
-    try {
-      // Try to parse as a URL. If it lacks a scheme, try adding https://
-      try {
-        // will throw if invalid
-        new URL(rawLink)
-        link = rawLink
-      } catch (_) {
-        // Prepend https:// and test again
-        const tryUrl = `https://${rawLink}`
-        new URL(tryUrl)
-        link = tryUrl
-      }
-    } catch (err) {
-      console.error('Invalid link provided:', rawLink)
-      revalidatePath('/post')
-      return { error: 'Please provide a valid URL or email address for application/contact.' }
-    }
-  }
-
   // --- 2. File Upload Handling (from 'main' branch logic) ---
   if (file && file.size > 0) {
     const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB limit
     if (file.size > MAX_FILE_SIZE) {
       console.error('File size exceeds 5MB limit')
       revalidatePath('/post')
+
+      return {error: 'File size exceeds 5MB limit.'}
     }
 
     const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
     if (!ALLOWED_TYPES.includes(file.type)) {
       console.error('Invalid file type, only image files (JPEG, PNG, GIF, WebP) are allowed')
       revalidatePath('/post')
+
+      return {error: 'Invalid file type. Only images are allowed.'}
     }
 
     // Upload file to Supabase Storage
@@ -115,6 +94,8 @@ export async function postOpportunity(formData: FormData) {
     if (uploadError) {
       console.error('File upload error:', uploadError)
       revalidatePath('/post')
+
+      return {error: 'Failed to upload file.'}
     }
 
     // Get the public URL for the uploaded file
@@ -157,25 +138,6 @@ export async function postOpportunity(formData: FormData) {
     revalidatePath('/post')
     return { error: 'An unexpected server error occurred.' }
   }
-
-  // --- 4. Success and Redirect (from 'main' branch logic) ---
-  console.log('Successfully created post!')
-  // Revalidate the /post page (to update the user's list of posts) and redirect
-  revalidatePath('/post')
-  redirect('/opportunities')
-}
-
-// Adapter for form action: the App Router expects a server action that returns
-// void | Promise<void>. Older `postOpportunity` returns an error object on
-// validation failures. This wrapper calls it and converts any error result into
-// a thrown Error so the form action has a void return type.
-export async function postOpportunityAction(formData: FormData): Promise<void> {
-  const result = await postOpportunity(formData)
-  if (result && typeof result === 'object' && 'error' in result && (result as any).error) {
-    // Throw so the action returns Promise<void> and the runtime surfaces the error.
-    throw new Error((result as any).error)
-  }
-  return
 }
 
 // Adapter for form action: the App Router expects a server action that returns

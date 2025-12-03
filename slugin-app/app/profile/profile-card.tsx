@@ -20,7 +20,7 @@ import {
     FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 
 const supabase = createClient();
@@ -39,24 +39,52 @@ export default function ProfileCard() {
     const [year, setYear] = useState("");
     const [industry, setIndustry] = useState("");
 
-    const handleSave = async () => {
-        const missing: string[] = [];
-        if (!firstName.trim()) missing.push("First name");
-        if (!lastName.trim()) missing.push("Last name");
-        if (!pronouns.trim()) missing.push("Pronouns");
-        if (!email.trim()) missing.push("Email");
-        if (!major) missing.push("Major");
-        if (!year) missing.push("Year");
+     useEffect(() => {
+   const fetchProfile = async () => {
+     const {
+       data: { user },
+     } = await supabase.auth.getUser();
 
-        if (missing.length > 0) {
-            alert("Please fill the required fields: " + missing.join(", "));
+     if (!user) return;
+
+     const { data, error } = await supabase
+       .from("profiles")
+       .select("*")
+       .eq("id", user.id)
+       .single();
+
+     if (error) {
+       console.error("Error fetching profile:", error.message);
+     } else if (data) {
+       setFirstName(data.first_name || "");
+       setPreferredName(data.preferredName || "");
+       setLastName(data.last_name || "");
+       setPronouns(data.pronouns || "");
+       setEmail(data.email || "");
+       setBio(data.bio || "");
+       setMajor(data.major || "");
+       setMinor(data.minor || "");
+       setYear(data.year || "");
+       setIndustry(data.industry || "");
+     }
+   };
+
+   fetchProfile();
+ }, []);
+
+    const handleSave = async () => {
+        const {data: {user}, error: authError, } = await supabase.auth.getUser();
+
+        if (authError || !user) {
+            alert("You must be logged in to save your profile.");
             return;
         }
 
         const saved = {
-            firstName,
+            id: user.id,
+            first_name: firstName,
             preferredName,
-            lastName,
+            last_name: lastName,
             pronouns,
             email,
             bio,
