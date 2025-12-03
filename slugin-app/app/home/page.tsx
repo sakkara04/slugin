@@ -199,7 +199,7 @@ export default async function HomePage() {
                                     {/* Middle: posted opportunities list (active) */}
                                     <div className="lg:col-span-1 bg-white rounded-lg p-6 shadow-sm">
                                         <h3 className="text-lg font-medium">Your posted opportunities</h3>
-                                        <p className="text-sm text-muted-foreground mt-1">Active opportunities you've posted (click View → Edit)</p>
+                                        <p className="text-sm text-muted-foreground mt-1">Active opportunities you've posted</p>
 
                                         <div className="mt-4 space-y-3">
                                             <UserOpportunitiesClient initial={userPostedActive} />
