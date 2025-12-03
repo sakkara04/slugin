@@ -28,9 +28,10 @@ export default async function PostPage() {
   }
 
   // Redirect to email verification if email is not confirmed
-  if (user && !user.email_confirmed_at) {
+  // OMITTED: email verification doesn't work
+  /*if (user && !user.email_confirmed_at) {
     redirect(`/verify-email?email=${encodeURIComponent(user.email || "")}`);
-  }
+  }*/
 
   // Fetch opportunities created by the current authenticated user, newest first
   let userOpportunities: any[] = [];
