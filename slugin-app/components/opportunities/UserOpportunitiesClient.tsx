@@ -17,6 +17,7 @@ export default function UserOpportunitiesClient({ initial }: { initial: Opportun
   const [opps, setOpps] = useState<Opportunity[]>(initial || [])
   const [editing, setEditing] = useState<Opportunity | null>(null)
   const [loading, setLoading] = useState(false)
+  const [file, setFile] = useState<File | null>(null)
 
   // form state mirrors the post form
   const [title, setTitle] = useState('')
@@ -24,6 +25,7 @@ export default function UserOpportunitiesClient({ initial }: { initial: Opportun
   const [deadline, setDeadline] = useState('')
   const [location, setLocation] = useState('')
   const [categories, setCategories] = useState('')
+  const [link, setLink] = useState('')
 
   useEffect(() => {
     if (editing) {
@@ -32,21 +34,37 @@ export default function UserOpportunitiesClient({ initial }: { initial: Opportun
       setDeadline(editing.deadline ? editing.deadline.slice(0,10) : '')
       setLocation(editing.location || '')
       setCategories(editing.categories || '')
+      setLink((editing as any).link || '')
+      setFile(null)
     }
   }, [editing])
 
   const openEdit = (opp: Opportunity) => setEditing(opp)
-  const closeEdit = () => setEditing(null)
+  const closeEdit = () => {
+    setEditing(null)
+    setFile(null)
+  }
 
   const saveEdit = async () => {
     if (!editing) return
     setLoading(true)
     try {
+      // Use FormData so we can include a file when present. The server route will handle multipart/form-data.
+      const fd = new FormData()
+      fd.append('id', editing.id)
+      fd.append('title', title)
+      fd.append('description', description)
+      fd.append('deadline', deadline || '')
+      fd.append('location', location)
+      fd.append('categories', categories)
+  fd.append('link', link || '')
+      if (file) fd.append('file', file)
+
       const res = await fetch('/api/opportunities/update', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: editing.id, title, description, deadline: deadline || null, location, categories }),
+        body: fd,
       })
+
       const json = await res.json()
       if (!res.ok) throw new Error(json?.error || 'Update failed')
       const updated = json.data
@@ -130,6 +148,12 @@ export default function UserOpportunitiesClient({ initial }: { initial: Opportun
 
               <label>Categories</label>
               <Input value={categories} onChange={(e) => setCategories(e.target.value)} className="mb-2" />
+
+              <label>Application link or contact email</label>
+              <Input value={link} onChange={(e) => setLink(e.target.value)} placeholder="https://example.com/apply or jane@example.com" className="mb-2" />
+
+              <label>Replace Image</label>
+              <Input type="file" accept="image/*,.pdf" onChange={(e) => setFile(e.target.files?.[0] || null)} className="mb-2" />
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginTop: 12 }}>

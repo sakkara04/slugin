@@ -1,4 +1,6 @@
 // post opportunity page
+// TO-DO:
+// --> update ui
 
 import { createClient } from "@/utils/supabase/server"
 import {
@@ -7,19 +9,18 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import { redirect } from "next/navigation"
 import Navbar from "@/components/ui/navbar"
-import Link from "next/link"
 import UserOpportunitiesClient from '@/components/opportunities/UserOpportunitiesClient'
-import PostOpportunityForm from "./postOpportunityForm"
+import PostOpportunityForm from "./postOpportunityForm";
 
 export default async function PostPage() {
-  const supabase = await createClient()
+  const supabase = await createClient();
 
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await supabase.auth.getUser();
 
   // Redirect to signin if no user
   if (!user) {
@@ -28,28 +29,28 @@ export default async function PostPage() {
 
   // Redirect to email verification if email is not confirmed
   if (user && !user.email_confirmed_at) {
-    redirect(`/verify-email?email=${encodeURIComponent(user.email || '')}`)
+    redirect(`/verify-email?email=${encodeURIComponent(user.email || "")}`);
   }
 
   // Fetch opportunities created by the current authenticated user, newest first
-  let userOpportunities: any[] = []
+  let userOpportunities: any[] = [];
   if (user) {
     const { data, error } = await supabase
-      .from('opportunities')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
+      .from("opportunities")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
 
     if (error) {
-      console.error('Error fetching user opportunities:', error)
+      console.error("Error fetching user opportunities:", error);
     } else if (data) {
-      userOpportunities = data
+      userOpportunities = data;
     }
   }
 
   return (
     <div>
-      <Navbar />
+      <Navbar user={user}/>
       <div style={{ display: 'flex', gap: 24, padding: '24px' }}>
         <div style={{ width: '50%' }}>
           <div className="container mx-auto py-8 px-4 max-w-2xl">
@@ -61,7 +62,7 @@ export default async function PostPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <PostOpportunityForm/>
+         <PostOpportunityForm/>
         </CardContent>
   </Card>
           </div>
@@ -70,11 +71,9 @@ export default async function PostPage() {
         <div style={{ width: '50%' }}>
           <h2 className="text-xl mb-4">Your Opportunities</h2>
           {/* Client-side list + edit modal */}
-          {/* @ts-ignore-next-line Server component passing data to client */}
           <UserOpportunitiesClient initial={userOpportunities} />
         </div>
       </div>
     </div>
-  )
+  );
 }
-

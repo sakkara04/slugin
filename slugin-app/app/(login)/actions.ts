@@ -1,6 +1,8 @@
-// server actions for user sign up/sign in
-
 'use server'
+
+// server actions for user sign up/sign in
+// TO-DO:
+// --> fix email verification error on account creation
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
@@ -56,7 +58,6 @@ export async function signup(formData: FormData) {
       role: 'student',
     });
   }
-
 
   // Check if email confirmation is required
   if (result.user && !result.user.email_confirmed_at) {

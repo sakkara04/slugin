@@ -1,9 +1,8 @@
 'use client'
 
-// user sign up form 
+// user sign in form 
 // TO-DO:
-// --> fix email verification error on account creation
-// --> finish sign up with google 
+// --> finish sign in with google 
 // --> input validation
 
 import { Button } from "@/components/ui/button"
@@ -22,25 +21,27 @@ import {
   FieldSeparator
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@radix-ui/react-tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useState } from "react"
-import { signup } from "../../actions"
-import SignUpGoogle from "./signup-google"
+import { login } from "../../actions"
+import SignInGoogle from "./signin-google"
 
-export function SignUpForm({
+export function SignInForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+
   const [activeTab, setActiveTab] = useState<"student" | "faculty">("student");
+
   return (
     <div className="flex flex-col gap-6 w-full">
       <Card>
         <CardHeader className="text-center pb-4">
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-sky-600 bg-clip-text text-transparent">
-            Create your account
+            Welcome back!
           </CardTitle>
           <CardDescription>
-            Enter your email below to get started
+            Enter your email and password below to sign in
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -64,20 +65,10 @@ export function SignUpForm({
               </TabsTrigger>
             </TabsList>
             <TabsContent value="student" className="mt-0">
-              <form action={signup}>
+              <form action={login}>
                 <FieldGroup>
-                  <Field className="grid grid-cols-2 gap-4">
-                    <Field>
-                      <FieldLabel htmlFor="student-first_name">First Name</FieldLabel>
-                      <Input id="student-first_name" name="first_name" type="text" className="h-11 border-input focus:border-primary focus:ring-primary/20" required />
-                    </Field>
-                    <Field>
-                      <FieldLabel htmlFor="student-last_name">Last Name</FieldLabel>
-                      <Input id="student-last_name" name="last_name" type="text" className="h-11 border-input focus:border-primary focus:ring-primary/20" required />
-                    </Field>
-                  </Field>
                   <Field>
-                    <FieldLabel htmlFor="student-email">School Email</FieldLabel>
+                    <FieldLabel htmlFor="student-email">Email</FieldLabel>
                     <Input
                       id="student-email"
                       name="email"
@@ -87,28 +78,21 @@ export function SignUpForm({
                     />
                   </Field>
                   <Field>
-                    <Field className="grid grid-cols-2 gap-4">
-                      <Field>
-                        <FieldLabel htmlFor="student-password">Password</FieldLabel>
-                        <Input id="student-password" name="password" type="password" required className="h-11 border-input focus:border-primary focus:ring-primary/20" />
-                      </Field>
-                      <Field>
-                        <FieldLabel htmlFor="student-confirm-password">
-                          Confirm Password
-                        </FieldLabel>
-                        <Input id="student-confirm-password" name="confirm-password" type="password" required className="h-11 border-input focus:border-primary focus:ring-primary/20" />
-                      </Field>
-                    </Field>
-                    <FieldDescription>
-                      Must be at least 8 characters long.
-                    </FieldDescription>
+                    <FieldLabel htmlFor="student-password">Password</FieldLabel>
+                    <Input
+                      id="student-password"
+                      name="password"
+                      type="password"
+                      className="h-11 border-input focus:border-primary focus:ring-primary/20"
+                      required
+                    />
                   </Field>
                   <Field>
                     <Button
                       type="submit"
                       className="w-full h-11 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 text-primary-foreground font-semibold shadow-md shadow-sky-500 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 hover:cursor-pointer"
                     >
-                      Create account
+                      Sign in
                     </Button>
                   </Field>
                   {/* <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
@@ -116,70 +100,43 @@ export function SignUpForm({
                       </FieldSeparator>
                       
                       <Field>
-                        <SignUpGoogle/>
+                        <SignInGoogle/>
                       </Field> */}
                   <FieldDescription className="text-center">
-                    Already have an account? <a href="/signin" className="bg-gradient-to-r from-sky-600 to-blue-600 bg-clip-text text-transparent font-semibold">Sign In</a>
+                    Don't have an account? <a href="/signup" className="bg-gradient-to-r from-sky-600 to-blue-600 bg-clip-text text-transparent font-semibold">Sign Up</a>
                   </FieldDescription>
                 </FieldGroup>
               </form>
             </TabsContent>
             <TabsContent value="faculty" className="mt-0">
-              <form action={signup}>
+              <form action={login}>
                 <FieldGroup>
-                  <Field className="grid grid-cols-2 gap-4">
-                    <Field>
-                      <FieldLabel htmlFor="faculty-first_name">First Name</FieldLabel>
-                      <Input id="faculty-first_name" name="first_name" type="text" required className="h-11 border-input focus:border-primary focus:ring-primary/20" />
-                    </Field>
-                    <Field>
-                      <FieldLabel htmlFor="faculty-last_name">Last Name</FieldLabel>
-                      <Input id="faculty-last_name" name="last_name" type="text" required className="h-11 border-input focus:border-primary focus:ring-primary/20" />
-                    </Field>
-                  </Field>
                   <Field>
-                    <FieldLabel htmlFor="faculty-email">School Email</FieldLabel>
+                    <FieldLabel htmlFor="faculty-email">Email</FieldLabel>
                     <Input
                       id="faculty-email"
                       name="email"
                       type="email"
-                      className="h-11 border-input focus:border-primary focus:ring-primary/20"
+                      className="h-11 border-input focus:border-accent focus:ring-accent/20"
                       required
                     />
                   </Field>
                   <Field>
-                    <FieldLabel htmlFor="faculty-website">Club or Faculty Website</FieldLabel>
+                    <FieldLabel htmlFor="faculty-password">Password</FieldLabel>
                     <Input
-                      id="faculty-website"
-                      name="website"
-                      type="website"
-                      className="h-11 border-input focus:border-primary focus:ring-primary/20"
+                      id="faculty-password"
+                      name="password"
+                      type="password"
+                      className="h-11 border-input focus:border-accent focus:ring-accent/20"
                       required
                     />
-                  </Field>
-                  <Field>
-                    <Field className="grid grid-cols-2 gap-4">
-                      <Field>
-                        <FieldLabel htmlFor="faculty-password">Password</FieldLabel>
-                        <Input id="faculty-password" name="password" type="password" className="h-11 border-input focus:border-primary focus:ring-primary/20" required />
-                      </Field>
-                      <Field>
-                        <FieldLabel htmlFor="faculty-confirm-password">
-                          Confirm Password
-                        </FieldLabel>
-                        <Input id="faculty-confirm-password" name="confirm-password" type="password" required className="h-11 border-input focus:border-primary focus:ring-primary/20" />
-                      </Field>
-                    </Field>
-                    <FieldDescription>
-                      Must be at least 8 characters long.
-                    </FieldDescription>
                   </Field>
                   <Field>
                     <Button
                       type="submit"
                       className="w-full h-11 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-accent-foreground font-semibold shadow-md shadow-amber-200 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 hover:cursor-pointer"
                     >
-                      Create account
+                      Sign in
                     </Button>
                   </Field>
                   {/* <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
@@ -187,10 +144,10 @@ export function SignUpForm({
                       </FieldSeparator>
                       
                       <Field>
-                        <SignUpGoogle/>
+                        <SignInGoogle/>
                       </Field> */}
                   <FieldDescription className="text-center">
-                    Already have an account? <a href="/signin" className="bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent font-semibold">Sign In</a>
+                    Don't have an account? <a href="/signup" className="bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent font-semibold">Sign up</a>
                   </FieldDescription>
                 </FieldGroup>
               </form>
