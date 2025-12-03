@@ -31,7 +31,6 @@ export function SignInForm({
   ...props
 }: React.ComponentProps<"div">) {
 
-  const [activeTab, setActiveTab] = useState<"student" | "faculty">("student");
 
   return (
     <div className="flex flex-col gap-6 w-full">
@@ -46,9 +45,8 @@ export function SignInForm({
         </CardHeader>
         <CardContent>
           <Tabs
-            value={activeTab}
-            onValueChange={(value) => setActiveTab(value as "student" | "faculty")}
-            className="w-full"
+          defaultValue="student"
+          className="w-full"
           >
             <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted/50 p-1 h-11 rounded-lg">
               <TabsTrigger
