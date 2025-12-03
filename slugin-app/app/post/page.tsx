@@ -1,7 +1,8 @@
 // post opportunity page
+// TO-DO:
+// --> update ui
 
-import { createClient } from "@/utils/supabase/server";
-import { Button } from "@/components/ui/button";
+import { createClient } from "@/utils/supabase/server"
 import {
   Card,
   CardContent,
@@ -9,19 +10,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { redirect } from "next/navigation";
-import { postOpportunityAction } from "./actions";
-import Navbar from "@/components/ui/navbar";
-import Link from "next/link";
-import UserOpportunitiesClient from "@/components/opportunities/UserOpportunitiesClient";
-import PostOpportunityForm from "./postOpportunityForm"
+import { redirect } from "next/navigation"
+import Navbar from "@/components/ui/navbar"
+import UserOpportunitiesClient from '@/components/opportunities/UserOpportunitiesClient'
+import PostOpportunityForm from "./postOpportunityForm";
 
 export default async function PostPage() {
   const supabase = await createClient();
@@ -68,9 +60,9 @@ export default async function PostPage() {
 
   return (
     <div>
-      <Navbar />
-      <div style={{ display: "flex", gap: 24, padding: "24px" }}>
-        <div style={{ width: "50%" }}>
+      <Navbar user={user}/>
+      <div style={{ display: 'flex', gap: 24, padding: '24px' }}>
+        <div style={{ width: '50%' }}>
           <div className="container mx-auto py-8 px-4 max-w-2xl">
             <Card>
         <CardHeader>
@@ -80,13 +72,13 @@ export default async function PostPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <PostOpportunityForm/>
+         <PostOpportunityForm/>
         </CardContent>
   </Card>
           </div>
         </div>
-        {/* Your Opportunities Section */}
-        <div style={{ width: "50%" }}>
+
+        <div style={{ width: '50%' }}>
           <h2 className="text-xl mb-4">Your Opportunities</h2>
           {/* Client-side list + edit modal */}
           <UserOpportunitiesClient initial={userOpportunities} />

@@ -40,7 +40,7 @@ export async function postOpportunity(formData: FormData) {
   if (!title || !description || !deadline || !location || !categories || !rawLink) {
     console.error('Missing required fields')
     // Revalidate and return to show the error state or redirect back to the form
-    revalidatePath('/post') 
+    revalidatePath('/post')
     return { error: 'Please fill out all required fields.' }
   }
 
@@ -75,31 +75,34 @@ export async function postOpportunity(formData: FormData) {
     if (file.size > MAX_FILE_SIZE) {
       console.error('File size exceeds 5MB limit')
       revalidatePath('/post')
-      return { error: 'File size exceeds 5MB limit.' }
+
+      return {error: 'File size exceeds 5MB limit.'}
     }
 
     const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
     if (!ALLOWED_TYPES.includes(file.type)) {
       console.error('Invalid file type, only image files (JPEG, PNG, GIF, WebP) are allowed')
       revalidatePath('/post')
-      return { error: 'Invalid file type. Only images are allowed.' }
+
+      return {error: 'Invalid file type. Only images are allowed.'}
     }
-    
+
     // Upload file to Supabase Storage
     const filePath = `${user.id}/${Date.now()}-${file.name}`
     const { error: uploadError } = await supabase.storage.from('flyers').upload(filePath, file)
-    
+
     if (uploadError) {
       console.error('File upload error:', uploadError)
       revalidatePath('/post')
-      return { error: 'Failed to upload file.' }
+
+      return {error: 'Failed to upload file.'}
     }
-    
+
     // Get the public URL for the uploaded file
     const { data } = supabase.storage.from('flyers').getPublicUrl(filePath)
     fileUrl = data.publicUrl
   }
-  
+
   // --- 3. Database Insertion (combining 'christina-US3.3-Task2' and 'main' logic) ---
   const row = {
     title,

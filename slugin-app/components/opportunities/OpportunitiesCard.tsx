@@ -7,6 +7,7 @@ import {
   upsertUserInteraction,
   deleteUserInteraction,
 } from "@/utils/supabase/interactions";
+import { User } from "@supabase/supabase-js";
 
 export type Opportunity = {
   id: string;
@@ -20,6 +21,7 @@ export type Opportunity = {
 
 type Props = {
   opp: Opportunity;
+  user: User | null;
   isApplied?: boolean;
   isSaved?: boolean;
   isLiked?: boolean;
