@@ -13,11 +13,13 @@ type Opportunity = {
   categories?: string
 }
 
-export default function UserOpportunitiesClient({ initial }: { initial: Opportunity[] }) {
+export default function UserOpportunitiesClient({ initial, applicants, saves }: { initial: Opportunity[], applicants?: Record<string, number>, saves?: Record<string, number> }) {
   const [opps, setOpps] = useState<Opportunity[]>(initial || [])
   const [editing, setEditing] = useState<Opportunity | null>(null)
   const [loading, setLoading] = useState(false)
   const [file, setFile] = useState<File | null>(null)
+  const [applicantsMap, setApplicantsMap] = useState<Record<string, number>>(applicants || {})
+  const [savesMap, setSavesMap] = useState<Record<string, number>>(saves || {})
 
   // form state mirrors the post form
   const [title, setTitle] = useState('')
@@ -109,6 +111,9 @@ export default function UserOpportunitiesClient({ initial }: { initial: Opportun
                     </span>
                     )}
                   </CardTitle>
+                <div className="text-sm text-muted-foreground mt-1">
+                  Applicants: {applicantsMap[opp.id] || 0} • Saves: {savesMap[opp.id] || 0}
+                </div>
               </CardHeader>
               <CardContent>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
