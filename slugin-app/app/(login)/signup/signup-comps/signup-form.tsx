@@ -65,6 +65,7 @@ export function SignUpForm({
             </TabsList>
             <TabsContent value="student" className="mt-0">
               <form action={signup}>
+                <input type="hidden" name="can_post" value="false" />
                 <FieldGroup>
                   <Field className="grid grid-cols-2 gap-4">
                     <Field>
@@ -126,6 +127,7 @@ export function SignUpForm({
             </TabsContent>
             <TabsContent value="faculty" className="mt-0">
               <form action={signup}>
+                <input type="hidden" name="can_post" value="true" />
                 <FieldGroup>
                   <Field className="grid grid-cols-2 gap-4">
                     <Field>

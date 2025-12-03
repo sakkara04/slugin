@@ -1,4 +1,6 @@
 // user sign up page
+'use client'
+
 
 import { SignInForm } from "@/app/(login)/signin/sign-in-comps/signin-form"
 import { Lightbulb, ArrowLeft } from "lucide-react"
