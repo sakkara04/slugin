@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/server"
 import { redirect } from "next/navigation"
 import SavedOpportunitiesList from '@/components/opportunities/SavedOpportunitiesList'
 import UserOpportunitiesClient from '@/components/opportunities/UserOpportunitiesClient'
+import AppliedOpportunitiesList from '../../components/opportunities/AppliedOpportunitiesList'
 
 export default async function HomePage() {
     const supabase = await createClient()
@@ -43,7 +44,10 @@ export default async function HomePage() {
     const savedIds = (interactions || [])
         .filter((r: any) => r.action === 'saved')
         .map((r: any) => Number(r.opportunity_id));
-    const appliedCount = (interactions || []).filter((r: any) => r.action === 'applied').length;
+    const appliedIds = (interactions || [])
+        .filter((r: any) => r.action === 'applied')
+        .map((r: any) => Number(r.opportunity_id));
+    const appliedCount = appliedIds.length;
 
     let savedOpps: any[] = [];
     if (!isFaculty && savedIds.length > 0) {
@@ -52,6 +56,16 @@ export default async function HomePage() {
             .select('*')
             .in('id', savedIds);
         savedOpps = oppData || [];
+    }
+
+    // Fetch applied opportunities for students so they can view them in a modal
+    let appliedOpps: any[] = [];
+    if (!isFaculty && appliedIds.length > 0) {
+        const { data: appliedData } = await supabase
+            .from('opportunities')
+            .select('*')
+            .in('id', appliedIds);
+        appliedOpps = appliedData || [];
     }
 
     // Only show active saved opportunities (deadline in the future or empty)
@@ -173,7 +187,10 @@ export default async function HomePage() {
                                                 <div className="mt-4 grid grid-cols-1 gap-3">
                                                         <div className="p-4 bg-gray-50 rounded-md">
                                                                 <div className="text-sm text-muted-foreground">Applications marked as applied</div>
-                                                                <div className="text-2xl font-bold mt-2">{appliedCount}</div>
+                                                                                                                                <div className="text-2xl font-bold mt-2">
+                                                                                                                                    {/* clickable applied list trigger */}
+                                                                                                                                    <AppliedOpportunitiesList initial={appliedOpps} count={appliedCount} />
+                                                                                                                                </div>
                                                         </div>
                                                         <div className="p-4 bg-gray-50 rounded-md">
                                                                 <div className="text-sm text-muted-foreground">Active saved opportunities</div>
