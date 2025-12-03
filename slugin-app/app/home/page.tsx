@@ -17,9 +17,10 @@ export default async function HomePage() {
     }
 
     // Redirect to email verification if email is not confirmed
-    if (user && !user.email_confirmed_at) {
+    // OMITTED: email verification doesn't work
+    /*if (user && !user.email_confirmed_at) {
         redirect(`/verify-email?email=${encodeURIComponent(user.email || '')}`)
-    }
+    }*/
 
     const first_name = user?.user_metadata?.first_name;
 

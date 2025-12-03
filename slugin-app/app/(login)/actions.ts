@@ -60,10 +60,11 @@ export async function signup(formData: FormData) {
   }
 
   // Check if email confirmation is required
-  if (result.user && !result.user.email_confirmed_at) {
+  // OMITTED: email verification doesn't work
+  /*if (result.user && !result.user.email_confirmed_at) {
     revalidatePath('/', 'layout')
     redirect('/verify-email?email=' + encodeURIComponent(data.email))
-  }
+  }*/
 
   revalidatePath('/', 'layout')
   redirect('/home')
