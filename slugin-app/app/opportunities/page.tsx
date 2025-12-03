@@ -20,9 +20,10 @@ export default async function OpportunitiesPage() {
     }
 
     // Redirect to email verification if email is not confirmed
-    if (user && !user.email_confirmed_at) {
+    // OMITTED: email verification doesn't work
+    /*if (user && !user.email_confirmed_at) {
         redirect(`/verify-email?email=${encodeURIComponent(user.email || '')}`)
-    }
+    }*/
 
     return (
         <div>
