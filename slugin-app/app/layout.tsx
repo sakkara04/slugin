@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "SlugIn",
-  description: "Your hub for opportunities at UCSC",
+  description: "UCSC opportunity hub",
 };
 
 export default function RootLayout({

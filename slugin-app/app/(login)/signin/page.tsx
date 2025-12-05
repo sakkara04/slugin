@@ -1,5 +1,6 @@
-// user sign up page
 'use client'
+
+// user sign up page
 
 
 import { SignInForm } from "@/app/(login)/signin/sign-in-comps/signin-form"

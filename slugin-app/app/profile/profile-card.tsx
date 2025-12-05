@@ -1,8 +1,6 @@
 'use client'
 
 // profile card
-// TO-DO:
-// --> update ui
 
 import Majors from "./majors";
 import Industries from "./industries";

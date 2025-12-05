@@ -34,7 +34,7 @@ export async function signup(formData: FormData) {
 
   const data = {
     email: formData.get('email') as string,
-    password: formData.get('password') as string,
+    password: formData.get('email') as string,
     options: {
       emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/confirm`,
       data: {
@@ -62,8 +62,9 @@ export async function signup(formData: FormData) {
       can_post: canPost,
     });
   }
-
+  
+redirect('/home')
   // Navigate to check email confirmation
-  revalidatePath('/', 'layout');
-  redirect('/verify-email?email=' + encodeURIComponent(data.email));
+  // revalidatePath('/', 'layout');
+  // redirect('/verify-email?email=' + encodeURIComponent(data.email));
 }
