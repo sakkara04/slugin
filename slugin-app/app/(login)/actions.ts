@@ -62,8 +62,9 @@ export async function signup(formData: FormData) {
       can_post: canPost,
     });
   }
-
+  
+redirect('/home')
   // Navigate to check email confirmation
-  revalidatePath('/', 'layout');
-  redirect('/verify-email?email=' + encodeURIComponent(data.email));
+  // revalidatePath('/', 'layout');
+  // redirect('/verify-email?email=' + encodeURIComponent(data.email));
 }

@@ -3,8 +3,6 @@
 // user sign up form 
 // TO-DO:
 // --> fix email verification error on account creation
-// --> finish sign up with google 
-// --> input validation
 
 import { Button } from "@/components/ui/button"
 import {

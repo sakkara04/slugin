@@ -1,4 +1,4 @@
-// home page --> to be finished
+// home page
 
 import Navbar from "@/components/ui/navbar"
 import { createClient } from "@/utils/supabase/server"
@@ -343,3 +343,5 @@ export default async function HomePage() {
         </div>
     )
 }
+
+

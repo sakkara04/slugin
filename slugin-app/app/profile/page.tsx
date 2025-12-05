@@ -1,6 +1,4 @@
 // profile page
-// TO-DO:
-// --> update ui
 
 import Navbar from "@/components/ui/navbar"
 import ProfileCard from "./profile-card"

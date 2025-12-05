@@ -1,6 +1,4 @@
 // opportunities page
-// TO-DO:
-// --> update ui
 
 import Navbar from "@/components/ui/navbar"
 import OpportunitiesCard from "./opportunities-card"

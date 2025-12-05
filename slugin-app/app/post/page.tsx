@@ -1,6 +1,4 @@
 // post opportunity page
-// TO-DO:
-// --> update ui
 
 import { createClient } from "@/utils/supabase/server"
 import {

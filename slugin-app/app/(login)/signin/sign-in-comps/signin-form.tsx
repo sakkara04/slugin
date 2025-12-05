@@ -1,9 +1,6 @@
 'use client'
 
 // user sign in form 
-// TO-DO:
-// --> finish sign in with google 
-// --> input validation
 
 import { Button } from "@/components/ui/button"
 import {

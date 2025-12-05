@@ -66,7 +66,7 @@ export default function OpportunityCard({
   return (
     <div
       key={opp.id}
-      className="border rounded-md p-4 hover:shadow-md flex flex-col justify-between min-h-[200px] break-words bg-transparent"
+      className="border rounded-md p-4 hover:shadow-md flex flex-col justify-between min-h-[200px] break-words bg-white"
       onClick={() => onSelect?.(opp)}
     >
       {/* Posting Information */}
