@@ -60,8 +60,8 @@ export default async function PostPage() {
   }
 
   return (
-    <div>
-      <Navbar user={user}/>
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-amber-50 to-blue-50">
+      <Navbar user={user} />
       <div style={{ display: 'flex', gap: 24, padding: '24px' }}>
         <div style={{ width: '50%' }}>
           <div className="container mx-auto py-8 px-4 max-w-2xl">

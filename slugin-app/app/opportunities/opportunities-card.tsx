@@ -14,8 +14,9 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu"
-import { Heart, Check, ExternalLink, Filter, X } from 'lucide-react';
+import { Heart, Check, ExternalLink, Filter, X, ArrowDownUp, Sparkles} from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { createClient} from '@/utils/supabase/client'
 import upsertUserInteraction from '@/utils/supabase/interactions';

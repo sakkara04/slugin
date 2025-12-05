@@ -126,6 +126,7 @@ export function SignUpForm({
               </form>
             </TabsContent>
             <TabsContent value="faculty" className="mt-0">
+              
               <form action={signup}>
                 <input type="hidden" name="can_post" value="true" />
                 <FieldGroup>

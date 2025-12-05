@@ -26,7 +26,7 @@ export default async function OpportunitiesPage() {
     }*/
 
     return (
-        <div>
+        <div className="min-h-screen bg-gradient-to-br from-sky-50 via-amber-50 to-blue-50">
             <Navbar user={user} />
             <OpportunitiesCard user={user} />
         </div>
